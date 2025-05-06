@@ -69,14 +69,10 @@ export async function addTicketToNotion(ticket: any) {
             }
           ]
         },
+        // For Notion's files property type, we can't upload files directly
+        // So we'll just leave it empty for now
         attachments: {
-          rich_text: attachmentsText ? [
-            {
-              text: {
-                content: attachmentsText
-              }
-            }
-          ] : []
+          files: []
         }
       }
     });
