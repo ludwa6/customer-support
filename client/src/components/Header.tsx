@@ -44,21 +44,6 @@ const Header = () => {
             </Link>
           </nav>
           
-          <div className="relative ml-3">
-            <button 
-              type="button" 
-              className="flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-              aria-expanded="false" 
-              aria-haspopup="true"
-            >
-              <img 
-                className="h-8 w-8 rounded-full" 
-                src="https://ui-avatars.com/api/?name=Guest+User&background=6366F1&color=fff" 
-                alt="User profile" 
-              />
-            </button>
-          </div>
-          
           <button 
             type="button" 
             className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-primary hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
