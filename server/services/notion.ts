@@ -326,78 +326,153 @@ export async function getFAQs(categoryId?: string) {
   }
 }
 
-/**
- * Find Chat Conversations database or create if it doesn't exist
- */
-export async function getChatConversationsDatabase() {
-  try {
-    // Try to find the existing database
-    const database = await findDatabaseByTitle("Chat Conversations");
-    
-    if (database) {
-      return database;
-    }
-    
-    // If not found, create it using the setup script
-    console.log("Chat Conversations database not found. Please run the setup-chat-database.ts script.");
-    throw new Error("Chat Conversations database not found");
-  } catch (error) {
-    console.error("Error finding Chat Conversations database:", error);
-    throw error;
-  }
-}
+// We're now using pages instead of a database to store chat conversations
 
 /**
- * Record a chat conversation in Notion
+ * Record a chat conversation in Notion by creating a child page
  */
 export async function recordChatConversation(sessionId: string, userMessage: string, aiResponse: string) {
   try {
-    // Get the conversations database
-    const database = await getChatConversationsDatabase();
+    if (!NOTION_PAGE_ID) {
+      throw new Error("NOTION_PAGE_ID is not set");
+    }
     
-    // Create a new entry in the database
+    // Create a new page under the main Notion page
+    const pageTitle = `Chat Session: ${sessionId.substring(0, 8)} - ${new Date().toLocaleString()}`;
+    
     const response = await notion.pages.create({
       parent: {
-        database_id: database.id,
+        page_id: NOTION_PAGE_ID,
       },
       properties: {
-        // Title property (using session ID)
-        SessionId: {
+        // Title is required for all pages
+        title: {
           title: [
             {
               text: {
-                content: sessionId
+                content: pageTitle
               }
             }
           ]
-        },
-        // Message content
-        UserMessage: {
-          rich_text: [
-            {
-              text: {
-                content: userMessage.substring(0, 2000) // Notion has a 2000 character limit
+        }
+      },
+      // Add the content to the page body instead of as properties
+      children: [
+        {
+          object: "block",
+          type: "heading_2",
+          heading_2: {
+            rich_text: [
+              {
+                type: "text",
+                text: {
+                  content: "Session Information"
+                }
               }
-            }
-          ]
+            ]
+          }
         },
-        AiResponse: {
-          rich_text: [
-            {
-              text: {
-                content: aiResponse.substring(0, 2000) // Notion has a 2000 character limit
+        {
+          object: "block",
+          type: "paragraph",
+          paragraph: {
+            rich_text: [
+              {
+                type: "text",
+                text: {
+                  content: `Session ID: ${sessionId}`
+                },
+                annotations: {
+                  bold: true
+                }
               }
-            }
-          ]
+            ]
+          }
         },
-        CreatedAt: {
-          date: {
-            start: new Date().toISOString()
+        {
+          object: "block",
+          type: "paragraph",
+          paragraph: {
+            rich_text: [
+              {
+                type: "text",
+                text: {
+                  content: `Timestamp: ${new Date().toISOString()}`
+                }
+              }
+            ]
+          }
+        },
+        {
+          object: "block",
+          type: "divider",
+          divider: {}
+        },
+        {
+          object: "block",
+          type: "heading_2",
+          heading_2: {
+            rich_text: [
+              {
+                type: "text",
+                text: {
+                  content: "User Message"
+                }
+              }
+            ]
+          }
+        },
+        {
+          object: "block",
+          type: "paragraph",
+          paragraph: {
+            rich_text: [
+              {
+                type: "text",
+                text: {
+                  content: userMessage.substring(0, 2000) // Notion has a 2000 character limit
+                }
+              }
+            ]
+          }
+        },
+        {
+          object: "block",
+          type: "divider",
+          divider: {}
+        },
+        {
+          object: "block",
+          type: "heading_2",
+          heading_2: {
+            rich_text: [
+              {
+                type: "text",
+                text: {
+                  content: "AI Response"
+                }
+              }
+            ]
+          }
+        },
+        {
+          object: "block",
+          type: "paragraph",
+          paragraph: {
+            rich_text: [
+              {
+                type: "text",
+                text: {
+                  content: aiResponse.substring(0, 2000) // Notion has a 2000 character limit
+                }
+              }
+            ]
           }
         }
-      }
+      ]
     });
     
+    console.log(`Created Notion page for chat session ${sessionId.substring(0, 8)}`);
     return response;
   } catch (error) {
     console.error("Error recording chat conversation in Notion:", error);

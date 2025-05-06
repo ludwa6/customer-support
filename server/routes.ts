@@ -147,7 +147,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const { recordChatConversation } = await import('./services/notion');
           // Record conversation asynchronously - don't wait for it to complete
           recordChatConversation(sessionId, message, response)
-            .then(() => console.log(`Chat conversation for session ${sessionId} recorded in Notion`))
+            .then((result) => {
+              if (result) {
+                console.log(`Chat conversation for session ${sessionId.substring(0, 8)} recorded in Notion`);
+              } else {
+                console.log(`Failed to record chat conversation for session ${sessionId.substring(0, 8)}`);
+              }
+            })
             .catch(err => console.error('Failed to record chat conversation:', err));
         } catch (notionError) {
           console.error('Error importing or using Notion service:', notionError);
