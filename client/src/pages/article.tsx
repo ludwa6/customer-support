@@ -80,16 +80,16 @@ const Article = () => {
           <div className="bg-white rounded-lg shadow-sm p-6">
             {/* Breadcrumb */}
             <div className="flex items-center text-sm text-gray-500 mb-4">
-              <Link href="/">
-                <a className="hover:text-primary">Home</a>
+              <Link href="/" className="hover:text-primary">
+                Home
               </Link>
               <span className="mx-2">/</span>
-              <Link href="/documentation">
-                <a className="hover:text-primary">Documentation</a>
+              <Link href="/documentation" className="hover:text-primary">
+                Documentation
               </Link>
               <span className="mx-2">/</span>
-              <Link href={`/documentation?category=${article.categoryId}`}>
-                <a className="hover:text-primary">{article.categoryName}</a>
+              <Link href={`/documentation?category=${article.categoryId}`} className="hover:text-primary">
+                {article.categoryName}
               </Link>
             </div>
             
@@ -116,15 +116,17 @@ const Article = () => {
                 <h2 className="text-lg font-semibold text-text mb-4">Related Articles</h2>
                 <div className="space-y-3">
                   {filteredRelatedArticles.map(related => (
-                    <Link key={related.id} href={`/article/${related.id}`}>
-                      <a className="block p-3 rounded-md hover:bg-gray-50">
-                        <h3 className="text-md font-medium text-primary mb-1">{related.title}</h3>
-                        <p className="text-sm text-gray-500">
-                          {related.content.length > 100 
-                            ? `${related.content.substring(0, 100)}...` 
-                            : related.content}
-                        </p>
-                      </a>
+                    <Link 
+                      key={related.id} 
+                      href={`/article/${related.id}`}
+                      className="block p-3 rounded-md hover:bg-gray-50"
+                    >
+                      <h3 className="text-md font-medium text-primary mb-1">{related.title}</h3>
+                      <p className="text-sm text-gray-500">
+                        {related.content.length > 100 
+                          ? `${related.content.substring(0, 100)}...` 
+                          : related.content}
+                      </p>
                     </Link>
                   ))}
                 </div>
