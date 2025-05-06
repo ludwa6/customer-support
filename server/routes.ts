@@ -150,7 +150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Support Tickets API
-  app.post('/api/tickets', upload.array('attachments', 5), async (req, res) => {
+  app.post('/api/tickets', async (req, res) => {
     try {
       const { name, email, description } = req.body;
       
@@ -163,16 +163,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const subject = req.body.subject || 'Support Request';
       const category = req.body.category || 'other';
       
-      // Get the uploaded files
-      const files = req.files as Express.Multer.File[];
-      const fileData = files?.map(file => ({
-        filename: file.filename,
-        originalName: file.originalname,
-        path: file.path,
-        size: file.size,
-        mimetype: file.mimetype
-      })) || [];
-      
       // Create the ticket in local database
       const newTicket = await storage.insertTicket({
         name,
@@ -180,7 +170,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         subject,
         category,
         description,
-        attachments: JSON.stringify(fileData),
         status: 'new',
         createdAt: new Date()
       });
