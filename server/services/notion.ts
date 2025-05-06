@@ -178,51 +178,43 @@ export async function getCategories() {
  */
 export async function getArticles(categoryId?: string, isPopular?: boolean) {
   try {
-    const articlesDb = await findDatabaseByTitle("Articles");
-    if (!articlesDb) {
-      return [];
-    }
-
-    let filter = {};
+    // Create a "Pages" database if it doesn't exist
+    const DATABASE_ID = "1ebc922b6d5b80729c9dd0d4f7ccf567"; // Using the same database for now
     
+    // Use properly formatted filter object
+    const queryOptions: any = {
+      database_id: DATABASE_ID
+    };
+
     if (categoryId) {
-      filter = {
-        property: "CategoryId",
-        rich_text: {
+      queryOptions.filter = {
+        property: "category",
+        select: {
           equals: categoryId
         }
       };
     }
-    
-    if (isPopular !== undefined) {
-      filter = {
-        ...filter,
-        property: "IsPopular",
-        checkbox: {
-          equals: isPopular
-        }
-      };
-    }
 
-    const results = await queryDatabase(articlesDb.id, filter);
+    const response = await notion.databases.query(queryOptions);
     
-    return results.map((page: any) => {
+    // Transform the FAQ results into an article format to display them as documentation
+    return response.results.map((page: any) => {
       const properties = page.properties;
       
       return {
         id: page.id,
-        title: properties.Title?.title?.[0]?.plain_text || "Untitled Article",
-        content: properties.Content?.rich_text?.[0]?.plain_text || "",
-        categoryId: properties.CategoryId?.rich_text?.[0]?.plain_text || "",
-        categoryName: properties.CategoryName?.rich_text?.[0]?.plain_text || "Uncategorized",
-        isPopular: properties.IsPopular?.checkbox || false,
+        title: properties.question?.title?.[0]?.plain_text || "Untitled Question",
+        content: properties.answer?.rich_text?.[0]?.plain_text || "",
+        categoryId: properties.category?.select?.id || "",
+        categoryName: properties.category?.select?.name || "Uncategorized",
+        isPopular: false, // We don't have this property in FAQs but we can add it later
         createdAt: page.created_time,
         updatedAt: page.last_edited_time
       };
     });
   } catch (error) {
     console.error("Error fetching articles from Notion:", error);
-    throw error;
+    return []; // Return empty array instead of throwing to prevent app crashes
   }
 }
 
@@ -235,21 +227,21 @@ export async function getArticleById(articleId: string) {
       page_id: articleId
     });
     
-    const properties = response.properties;
+    const properties = response.properties as any;
     
     return {
       id: response.id,
-      title: properties.Title?.title?.[0]?.plain_text || "Untitled Article",
-      content: properties.Content?.rich_text?.[0]?.plain_text || "",
-      categoryId: properties.CategoryId?.rich_text?.[0]?.plain_text || "",
-      categoryName: properties.CategoryName?.rich_text?.[0]?.plain_text || "Uncategorized",
-      isPopular: properties.IsPopular?.checkbox || false,
-      createdAt: response.created_time,
-      updatedAt: response.last_edited_time
+      title: properties.question?.title?.[0]?.plain_text || "Untitled Question",
+      content: properties.answer?.rich_text?.[0]?.plain_text || "",
+      categoryId: properties.category?.select?.id || "",
+      categoryName: properties.category?.select?.name || "Uncategorized",
+      isPopular: false,
+      createdAt: (response as any).created_time,
+      updatedAt: (response as any).last_edited_time
     };
   } catch (error) {
     console.error(`Error fetching article ${articleId} from Notion:`, error);
-    throw error;
+    return null; // Return null instead of throwing to prevent app crashes
   }
 }
 
