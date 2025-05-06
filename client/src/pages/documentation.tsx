@@ -37,11 +37,11 @@ const Documentation = () => {
     queryKey: ["/api/categories"],
   });
   
-  // Fetch articles for the selected category
+  // Fetch all articles - we'll filter them on the client side
   const { data: articles, isLoading } = useQuery<Article[]>({
-    queryKey: ["/api/articles", categoryId],
+    queryKey: ["/api/articles"],
     queryFn: async () => {
-      const response = await fetch(`/api/articles${categoryId ? `?categoryId=${categoryId}` : ''}`);
+      const response = await fetch("/api/articles");
       if (!response.ok) throw new Error("Failed to fetch articles");
       const data = await response.json();
       console.log("Fetched articles:", data);
@@ -52,13 +52,26 @@ const Documentation = () => {
   // Get the selected category name
   const selectedCategory = categories?.find(cat => cat.id === categoryId);
   
-  // Filter articles based on search query and category
-  const filteredArticles = searchQuery && articles 
-    ? articles.filter(article => 
-        (article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        article.content.toLowerCase().includes(searchQuery.toLowerCase()))
-      )
-    : articles;
+  // Filter articles based on category and search query
+  const filteredArticles = articles 
+    ? articles.filter(article => {
+        // First filter by category if one is selected
+        if (categoryId && article.categoryId !== categoryId) {
+          return false;
+        }
+        
+        // Then filter by search query if one exists
+        if (searchQuery) {
+          return (
+            article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            article.content.toLowerCase().includes(searchQuery.toLowerCase())
+          );
+        }
+        
+        // If no search query and category matches (or no category selected), keep the article
+        return true;
+      })
+    : [];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -149,35 +162,31 @@ const Documentation = () => {
                           </div>
                         ))}
                       </div>
-                    ) : (
+                    ) : filteredArticles && filteredArticles.length > 0 ? (
                       <div className="space-y-4 mt-4">
-                        {filteredArticles && filteredArticles
-                          .filter(article => article.categoryId === category.id)
-                          .map(article => (
-                            <div key={article.id} className="bg-gray-50 p-4 rounded-lg">
-                              <h2 className="text-lg font-medium text-primary mb-2">{article.title}</h2>
-                              <div className="prose prose-sm text-gray-700">
-                                {article.content.split('\n').map((paragraph, idx) => (
-                                  <p key={idx} className="mb-2">{paragraph}</p>
-                                ))}
-                              </div>
-                              <div className="mt-2">
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                  {article.categoryName}
-                                </span>
-                              </div>
+                        {filteredArticles.map(article => (
+                          <div key={article.id} className="bg-gray-50 p-4 rounded-lg">
+                            <h2 className="text-lg font-medium text-primary mb-2">{article.title}</h2>
+                            <div className="prose prose-sm text-gray-700">
+                              {article.content.split('\n').map((paragraph, idx) => (
+                                <p key={idx} className="mb-2">{paragraph}</p>
+                              ))}
                             </div>
-                          ))}
-                        
-                        {(!filteredArticles || filteredArticles.filter(article => article.categoryId === category.id).length === 0) && (
-                          <div className="text-center py-10">
-                            <p className="text-gray-500">
-                              {searchQuery 
-                                ? `No articles found matching "${searchQuery}" in this category` 
-                                : "No articles available for this category yet."}
-                            </p>
+                            <div className="mt-2">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                {article.categoryName}
+                              </span>
+                            </div>
                           </div>
-                        )}
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-10">
+                        <p className="text-gray-500">
+                          {searchQuery 
+                            ? `No articles found matching "${searchQuery}" in this category` 
+                            : "No articles available for this category yet."}
+                        </p>
                       </div>
                     )}
                   </TabsContent>
