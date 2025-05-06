@@ -95,9 +95,9 @@ const Documentation = () => {
             {/* Categories Tabs */}
             {categories && categories.length > 0 && (
               <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-                <TabsList className="flex flex-wrap">
+                <TabsList className="flex flex-wrap gap-1.5 mb-4 overflow-x-auto p-1">
                   <Link href="/documentation" className="inline-block">
-                    <TabsTrigger value="all">All</TabsTrigger>
+                    <TabsTrigger value="all" className="px-3 py-1.5 whitespace-nowrap text-sm">All</TabsTrigger>
                   </Link>
                   {categories.map(category => (
                     <Link 
@@ -105,7 +105,7 @@ const Documentation = () => {
                       href={`/documentation?category=${category.id}`}
                       className="inline-block"
                     >
-                      <TabsTrigger value={category.id}>
+                      <TabsTrigger value={category.id} className="px-3 py-1.5 whitespace-nowrap text-sm">
                         {category.name}
                       </TabsTrigger>
                     </Link>
@@ -132,7 +132,7 @@ const Documentation = () => {
                               <p key={idx} className="mb-2">{paragraph}</p>
                             ))}
                           </div>
-                          <div className="mt-2">
+                          <div className="mt-4 pt-2 border-t border-gray-100">
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                               {article.categoryName}
                             </span>
@@ -172,7 +172,7 @@ const Documentation = () => {
                                 <p key={idx} className="mb-2">{paragraph}</p>
                               ))}
                             </div>
-                            <div className="mt-2">
+                            <div className="mt-4 pt-2 border-t border-gray-100">
                               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                 {article.categoryName}
                               </span>
