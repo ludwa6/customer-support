@@ -132,16 +132,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Chat API
   app.post('/api/chat', async (req, res) => {
     try {
-      const { message } = req.body;
+      const { message, sessionId } = req.body;
       
       if (!message) {
         return res.status(400).json({ message: 'Message is required' });
       }
       
-      // Generate AI response (redirect functionality has been removed)
+      // Generate AI response
       const response = await generateAIResponse(message);
       
-      res.json({ response });
+      // Record the conversation in Notion if sessionId is provided
+      if (sessionId && process.env.NOTION_INTEGRATION_SECRET && NOTION_PAGE_ID) {
+        try {
+          const { recordChatConversation } = await import('./services/notion');
+          // Record conversation asynchronously - don't wait for it to complete
+          recordChatConversation(sessionId, message, response)
+            .then(() => console.log(`Chat conversation for session ${sessionId} recorded in Notion`))
+            .catch(err => console.error('Failed to record chat conversation:', err));
+        } catch (notionError) {
+          console.error('Error importing or using Notion service:', notionError);
+          // Continue - don't let Notion recording failure affect the API response
+        }
+      }
+      
+      res.json({ response, sessionId });
     } catch (error) {
       console.error('Error generating chat response:', error);
       res.status(500).json({ message: 'Failed to generate response' });

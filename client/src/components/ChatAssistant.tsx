@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 const ChatAssistant = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [inputMessage, setInputMessage] = useState("");
+  const [sessionId, setSessionId] = useState<string>("");
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "welcome",
@@ -18,6 +19,14 @@ const ChatAssistant = () => {
   ]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  
+  // Generate a session ID when the component mounts
+  useEffect(() => {
+    // Create a new session ID if one doesn't exist
+    if (!sessionId) {
+      setSessionId(uuidv4());
+    }
+  }, [sessionId]);
 
   // Function to handle opening and closing the chat widget
   const toggleChat = () => {

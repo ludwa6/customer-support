@@ -325,3 +325,83 @@ export async function getFAQs(categoryId?: string) {
     return []; // Return empty array instead of throwing to prevent app crashes
   }
 }
+
+/**
+ * Find Chat Conversations database or create if it doesn't exist
+ */
+export async function getChatConversationsDatabase() {
+  try {
+    // Try to find the existing database
+    const database = await findDatabaseByTitle("Chat Conversations");
+    
+    if (database) {
+      return database;
+    }
+    
+    // If not found, create it using the setup script
+    console.log("Chat Conversations database not found. Please run the setup-chat-database.ts script.");
+    throw new Error("Chat Conversations database not found");
+  } catch (error) {
+    console.error("Error finding Chat Conversations database:", error);
+    throw error;
+  }
+}
+
+/**
+ * Record a chat conversation in Notion
+ */
+export async function recordChatConversation(sessionId: string, userMessage: string, aiResponse: string) {
+  try {
+    // Get the conversations database
+    const database = await getChatConversationsDatabase();
+    
+    // Create a new entry in the database
+    const response = await notion.pages.create({
+      parent: {
+        database_id: database.id,
+      },
+      properties: {
+        // Title property (using session ID)
+        SessionId: {
+          title: [
+            {
+              text: {
+                content: sessionId
+              }
+            }
+          ]
+        },
+        // Message content
+        UserMessage: {
+          rich_text: [
+            {
+              text: {
+                content: userMessage.substring(0, 2000) // Notion has a 2000 character limit
+              }
+            }
+          ]
+        },
+        AiResponse: {
+          rich_text: [
+            {
+              text: {
+                content: aiResponse.substring(0, 2000) // Notion has a 2000 character limit
+              }
+            }
+          ]
+        },
+        CreatedAt: {
+          date: {
+            start: new Date().toISOString()
+          }
+        }
+      }
+    });
+    
+    return response;
+  } catch (error) {
+    console.error("Error recording chat conversation in Notion:", error);
+    // Don't throw - this should not break the chat functionality
+    return null;
+  }
+}
