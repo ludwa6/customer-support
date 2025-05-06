@@ -173,7 +173,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         mimetype: file.mimetype
       })) || [];
       
-      // Create the ticket
+      // Create the ticket in local database
       const newTicket = await storage.insertTicket({
         name,
         email,
@@ -184,6 +184,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: 'new',
         createdAt: new Date()
       });
+      
+      // Try to add the ticket to Notion if integration is configured
+      if (process.env.NOTION_INTEGRATION_SECRET && process.env.NOTION_PAGE_URL) {
+        try {
+          const { addTicketToNotion } = await import('./services/notion-tickets');
+          await addTicketToNotion(newTicket);
+        } catch (notionError) {
+          console.error('Error adding ticket to Notion:', notionError);
+          // We don't fail the request if Notion integration fails
+        }
+      }
       
       res.status(201).json({
         message: 'Ticket submitted successfully',
@@ -246,6 +257,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!updatedTicket) {
         return res.status(404).json({ message: 'Ticket not found' });
+      }
+      
+      // Try to update the status in Notion if integration is configured
+      if (process.env.NOTION_INTEGRATION_SECRET && process.env.NOTION_PAGE_URL) {
+        try {
+          const { addTicketToNotion } = await import('./services/notion-tickets');
+          await addTicketToNotion(updatedTicket);
+        } catch (notionError) {
+          console.error('Error updating ticket in Notion:', notionError);
+          // We don't fail the request if Notion integration fails
+        }
       }
       
       res.json({
