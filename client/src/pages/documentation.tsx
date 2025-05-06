@@ -1,17 +1,23 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { Category, Article } from "@/types";
 import SearchBar from "@/components/SearchBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ChatAssistant from "@/components/ChatAssistant";
 
 const Documentation = () => {
-  const [_, params] = useLocation();
-  const searchParams = new URLSearchParams(params);
+  const [location] = useLocation();
+  const searchParams = new URLSearchParams(window.location.search);
   const categoryId = searchParams.get("category");
   
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState<string>(categoryId || "all");
+  
+  // Update active tab when category changes in URL
+  useEffect(() => {
+    setActiveTab(categoryId || "all");
+  }, [categoryId]);
   
   // Fetch categories
   const { data: categories } = useQuery<Category[]>({
@@ -33,11 +39,11 @@ const Documentation = () => {
   // Get the selected category name
   const selectedCategory = categories?.find(cat => cat.id === categoryId);
   
-  // Filter articles based on search query
+  // Filter articles based on search query and category
   const filteredArticles = searchQuery && articles 
     ? articles.filter(article => 
-        article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        article.content.toLowerCase().includes(searchQuery.toLowerCase())
+        (article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        article.content.toLowerCase().includes(searchQuery.toLowerCase()))
       )
     : articles;
 
@@ -62,13 +68,21 @@ const Documentation = () => {
             
             {/* Categories Tabs */}
             {categories && categories.length > 0 && (
-              <Tabs defaultValue={categoryId || "all"} className="mb-6">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
                 <TabsList className="flex flex-wrap">
-                  <TabsTrigger value="all">All</TabsTrigger>
+                  <Link href="/documentation" className="inline-block">
+                    <TabsTrigger value="all">All</TabsTrigger>
+                  </Link>
                   {categories.map(category => (
-                    <TabsTrigger key={category.id} value={category.id}>
-                      {category.name}
-                    </TabsTrigger>
+                    <Link 
+                      key={category.id} 
+                      href={`/documentation?category=${category.id}`}
+                      className="inline-block"
+                    >
+                      <TabsTrigger value={category.id}>
+                        {category.name}
+                      </TabsTrigger>
+                    </Link>
                   ))}
                 </TabsList>
                 
