@@ -38,10 +38,11 @@ const Home = () => {
             </div>
           </div>
           
-          {/* Ticket Form (conditionally rendered) */}
-          {isTicketFormOpen && (
-            <TicketForm onClose={() => setIsTicketFormOpen(false)} />
-          )}
+          {/* Ticket Form Dialog */}
+          <TicketForm 
+            isOpen={isTicketFormOpen} 
+            onClose={() => setIsTicketFormOpen(false)} 
+          />
         </div>
       </div>
     </div>
