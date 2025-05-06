@@ -138,19 +138,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'Message is required' });
       }
       
-      // Check if the message should be redirected to support
-      const shouldRedirect = await shouldRedirectToSupport(message);
-      
-      if (shouldRedirect) {
-        return res.json({
-          response: "I'm not able to fully address this question. For more personalized help, please submit a support ticket using the form below, and our team will get back to you within 24 hours.",
-          shouldRedirect: true
-        });
-      }
-      
-      // Generate AI response
+      // Always generate AI response without checking for redirection
       const response = await generateAIResponse(message);
       
+      // Always set shouldRedirect to false
       res.json({ response, shouldRedirect: false });
     } catch (error) {
       console.error('Error generating chat response:', error);
