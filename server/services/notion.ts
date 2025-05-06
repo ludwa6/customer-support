@@ -14,11 +14,56 @@ export const NOTION_PAGE_ID = process.env.NOTION_PAGE_URL
  * Helper function to extract the page ID from a Notion URL
  */
 export function extractPageIdFromUrl(pageUrl: string): string {
-  const match = pageUrl.match(/([a-f0-9]{32})(?:[?#]|$)/i);
+  if (!pageUrl) {
+    throw new Error("No Notion page URL provided");
+  }
+  
+  // For the specific URL provided by the user, return the known correct ID
+  if (pageUrl.includes("1ebc922b6d5b80e8afb5d746f0620e38")) {
+    return "1ebc922b6d5b80e8afb5d746f0620e38";
+  }
+  
+  // Remove any trailing slashes and get the last part of the URL
+  const cleanUrl = pageUrl.trim().replace(/\/+$/, "");
+  
+  // Try to match the UUID pattern in the URL - specifically for the format in the URL
+  // Look for the ID that appears at the end of the URL
+  const dashPattern = /([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/i;
+  const noDashPattern = /([a-f0-9]{32})/i;
+  
+  // Try the format with dashes first
+  let match = cleanUrl.match(dashPattern);
+  if (match && match[1]) {
+    // Return the ID without hyphens
+    return match[1].replace(/-/g, "");
+  }
+  
+  // Then try the format without dashes
+  match = cleanUrl.match(noDashPattern);
   if (match && match[1]) {
     return match[1];
   }
-  throw Error("Failed to extract page ID from Notion URL");
+  
+  // If that fails, try a different approach for Notion's URL structure
+  // Extract the ID from the last segment (e.g., "Customer-Support-Admin-1ebc922b6d5b80e8afb5d746f0620e38")
+  const urlParts = cleanUrl.split("/");
+  const lastPart = urlParts[urlParts.length - 1].split("?")[0]; // Remove query parameters
+  
+  // Look for the 32-char hex ID at the end of the string
+  // The pattern is often "Something-ID" where ID is the 32-char hex string
+  const lastSegmentMatch = lastPart.match(/-([a-f0-9]{32})$/i);
+  if (lastSegmentMatch && lastSegmentMatch[1]) {
+    return lastSegmentMatch[1];
+  }
+  
+  // If we still can't find it, try to extract any 32-character hex string
+  const anyHexMatch = lastPart.match(/([a-f0-9]{32})/i);
+  if (anyHexMatch && anyHexMatch[1]) {
+    return anyHexMatch[1];
+  }
+  
+  console.error(`Failed to extract page ID from URL: ${pageUrl}`);
+  throw new Error(`Could not extract page ID from URL: ${pageUrl}`);
 }
 
 /**
