@@ -177,8 +177,12 @@ export async function getCategories() {
  */
 export async function getArticles(categoryId?: string, isPopular?: boolean) {
   try {
-    // Using the direct DATABASE_ID for the FAQ database
-    const DATABASE_ID = "1ebc922b6d5b80729c9dd0d4f7ccf567";
+    // Look for the Articles database first
+    const articlesDb = await findDatabaseByTitle("Articles");
+    
+    // If Articles database doesn't exist, use the FAQ database as a fallback
+    // This ensures we only show authentic data from Notion
+    const DATABASE_ID = articlesDb ? articlesDb.id : "1ebc922b6d5b80729c9dd0d4f7ccf567";
     
     // Use properly formatted query options
     const queryOptions: any = {
@@ -187,38 +191,66 @@ export async function getArticles(categoryId?: string, isPopular?: boolean) {
     
     // Add filter if categoryId is provided
     if (categoryId) {
-      queryOptions.filter = {
-        property: "category",
-        select: {
-          equals: categoryId
-        }
-      };
+      // For Articles database
+      if (articlesDb) {
+        queryOptions.filter = {
+          property: "Category",
+          relation: {
+            contains: categoryId
+          }
+        };
+      } else {
+        // For FAQ database
+        queryOptions.filter = {
+          property: "category",
+          select: {
+            equals: categoryId
+          }
+        };
+      }
     }
     
-    // Sort by category to group related items together
+    // Sort by appropriate field based on database
     queryOptions.sorts = [
       {
-        property: "category",
+        property: articlesDb ? "Title" : "category",
         direction: "ascending"
       }
     ];
 
+    console.log(`Querying Notion database (${DATABASE_ID}) for articles with options:`, JSON.stringify(queryOptions));
     const response = await notion.databases.query(queryOptions);
+    console.log(`Got ${response.results.length} results from Notion`);
     
-    // Transform the FAQ results into an article format to display them as documentation
+    // Transform the results based on which database we're using
     return response.results.map((page: any) => {
       const properties = page.properties;
       
-      return {
-        id: page.id,
-        title: properties.question?.title?.[0]?.plain_text || "Untitled Question",
-        content: properties.answer?.rich_text?.[0]?.plain_text || "",
-        categoryId: properties.category?.select?.id || "",
-        categoryName: properties.category?.select?.name || "Uncategorized",
-        isPopular: false, // Set isPopular to false as default - we're only using real Notion data
-        createdAt: page.created_time,
-        updatedAt: page.last_edited_time
-      };
+      if (articlesDb) {
+        // Format for Articles database
+        return {
+          id: page.id,
+          title: properties.Title?.title?.[0]?.plain_text || "Untitled Article",
+          content: properties.Content?.rich_text?.[0]?.plain_text || "",
+          categoryId: properties.Category?.relation?.[0]?.id || "",
+          categoryName: properties.CategoryName?.select?.name || "Uncategorized",
+          isPopular: properties.IsPopular?.checkbox || false,
+          createdAt: page.created_time,
+          updatedAt: page.last_edited_time
+        };
+      } else {
+        // Format for FAQ database
+        return {
+          id: page.id,
+          title: properties.question?.title?.[0]?.plain_text || "Untitled Question",
+          content: properties.answer?.rich_text?.[0]?.plain_text || "",
+          categoryId: properties.category?.select?.id || "",
+          categoryName: properties.category?.select?.name || "Uncategorized",
+          isPopular: false,
+          createdAt: page.created_time,
+          updatedAt: page.last_edited_time
+        };
+      }
     });
   } catch (error) {
     console.error("Error fetching articles from Notion:", error);
