@@ -261,10 +261,13 @@ export async function getFAQs(categoryId?: string) {
     // Using the direct DATABASE_ID since we know it now
     const DATABASE_ID = "1ebc922b6d5b80729c9dd0d4f7ccf567";
     
-    let filter = {};
+    // Use properly formatted filter object or no filter
+    const queryOptions: any = {
+      database_id: DATABASE_ID
+    };
     
     if (categoryId) {
-      filter = {
+      queryOptions.filter = {
         property: "category",
         select: {
           equals: categoryId
@@ -272,10 +275,7 @@ export async function getFAQs(categoryId?: string) {
       };
     }
 
-    const response = await notion.databases.query({
-      database_id: DATABASE_ID,
-      filter
-    });
+    const response = await notion.databases.query(queryOptions);
     
     return response.results.map((page: any) => {
       const properties = page.properties;

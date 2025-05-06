@@ -12,8 +12,7 @@ const Header = () => {
     <header className="bg-white shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
         <div className="flex items-center">
-          <Link href="/">
-            <a className="flex items-center">
+          <Link href="/" className="flex items-center">
               <div className="bg-primary rounded-lg p-2 mr-3">
                 <svg 
                   xmlns="http://www.w3.org/2000/svg" 
@@ -32,23 +31,22 @@ const Header = () => {
               </div>
               <span className="text-xl font-semibold text-text">SerenityFlow</span>
               <span className="ml-2 text-sm text-gray-500">Support Portal</span>
-            </a>
           </Link>
         </div>
         
         <div className="flex items-center space-x-4">
           <nav className="hidden md:flex space-x-4">
-            <Link href="/">
-              <a className="text-primary font-medium">Support Home</a>
+            <Link href="/" className="text-primary font-medium">
+              Support Home
             </Link>
-            <Link href="/documentation">
-              <a className="text-gray-500 hover:text-primary font-medium">Documentation</a>
+            <Link href="/documentation" className="text-gray-500 hover:text-primary font-medium">
+              Documentation
             </Link>
-            <Link href="/#faq">
-              <a className="text-gray-500 hover:text-primary font-medium">FAQs</a>
+            <Link href="/#faq" className="text-gray-500 hover:text-primary font-medium">
+              FAQs
             </Link>
-            <Link href="/#contact">
-              <a className="text-gray-500 hover:text-primary font-medium">Contact</a>
+            <Link href="/#contact" className="text-gray-500 hover:text-primary font-medium">
+              Contact
             </Link>
           </nav>
           
@@ -94,25 +92,17 @@ const Header = () => {
       {/* Mobile menu */}
       <div className={`md:hidden ${isMobileMenuOpen ? 'block' : 'hidden'}`}>
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-          <Link href="/">
-            <a className="block px-3 py-2 rounded-md text-base font-medium text-primary bg-gray-50">
-              Support Home
-            </a>
+          <Link href="/" className="block px-3 py-2 rounded-md text-base font-medium text-primary bg-gray-50">
+            Support Home
           </Link>
-          <Link href="/documentation">
-            <a className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-primary hover:bg-gray-50">
-              Documentation
-            </a>
+          <Link href="/documentation" className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-primary hover:bg-gray-50">
+            Documentation
           </Link>
-          <Link href="/#faq">
-            <a className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-primary hover:bg-gray-50">
-              FAQs
-            </a>
+          <Link href="/#faq" className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-primary hover:bg-gray-50">
+            FAQs
           </Link>
-          <Link href="/#contact">
-            <a className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-primary hover:bg-gray-50">
-              Contact
-            </a>
+          <Link href="/#contact" className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-primary hover:bg-gray-50">
+            Contact
           </Link>
         </div>
       </div>
