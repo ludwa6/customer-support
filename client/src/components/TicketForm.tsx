@@ -23,7 +23,6 @@ const ticketFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
   subject: z.string().min(5, "Subject must be at least 5 characters"),
-  category: z.string().min(1, "Please select a category"),
   description: z.string().min(10, "Description must be at least 10 characters"),
 });
 
@@ -44,7 +43,6 @@ const TicketForm: React.FC<TicketFormProps> = ({ isOpen, onClose }) => {
       name: "",
       email: "",
       subject: "",
-      category: "",
       description: "",
     },
   });
@@ -154,37 +152,6 @@ const TicketForm: React.FC<TicketFormProps> = ({ isOpen, onClose }) => {
                       <FormControl>
                         <Input placeholder="Brief description of your issue" {...field} />
                       </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              
-              <div className="sm:col-span-2">
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Category</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a category" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="account">Account Issues</SelectItem>
-                          <SelectItem value="billing">Billing & Payments</SelectItem>
-                          <SelectItem value="technical">Technical Problems</SelectItem>
-                          <SelectItem value="integrations">Integration Issues</SelectItem>
-                          <SelectItem value="feature">Feature Requests</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}

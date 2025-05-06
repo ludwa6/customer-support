@@ -152,12 +152,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Support Tickets API
   app.post('/api/tickets', upload.array('attachments', 5), async (req, res) => {
     try {
-      const { name, email, subject, category, description } = req.body;
+      const { name, email, subject, description } = req.body;
       
       // Validate required fields
-      if (!name || !email || !subject || !category || !description) {
+      if (!name || !email || !subject || !description) {
         return res.status(400).json({ message: 'All fields are required' });
       }
+      
+      // Set default category if not provided
+      const category = req.body.category || 'other';
       
       // Get the uploaded files
       const files = req.files as Express.Multer.File[];
