@@ -42,9 +42,6 @@ const Header = () => {
             <Link href="/documentation" className="text-gray-500 hover:text-primary font-medium">
               Documentation
             </Link>
-            <Link href="/#faq" className="text-gray-500 hover:text-primary font-medium">
-              FAQs
-            </Link>
             <Link href="/#contact" className="text-gray-500 hover:text-primary font-medium">
               Contact
             </Link>
@@ -97,9 +94,6 @@ const Header = () => {
           </Link>
           <Link href="/documentation" className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-primary hover:bg-gray-50">
             Documentation
-          </Link>
-          <Link href="/#faq" className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-primary hover:bg-gray-50">
-            FAQs
           </Link>
           <Link href="/#contact" className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-primary hover:bg-gray-50">
             Contact
