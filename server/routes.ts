@@ -86,8 +86,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Popular Articles API
   app.get('/api/articles/popular', async (req, res) => {
     try {
-      const articles = await getArticles(undefined, true);
-      res.json(articles);
+      // Get all articles and take the first 5 as popular ones
+      // In a real app, you would have a specific flag in Notion for popular articles
+      const allArticles = await getArticles();
+      
+      // Just get 5 articles from the list
+      const popularArticles = allArticles.slice(0, 5);
+      
+      res.json(popularArticles);
     } catch (error) {
       console.error('Error fetching popular articles:', error);
       res.status(500).json({ message: 'Failed to fetch popular articles' });

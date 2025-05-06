@@ -1,5 +1,4 @@
 import { Client } from "@notionhq/client";
-import { extractPageIdFromUrl } from "./utils";
 
 // Initialize Notion client
 export const notion = new Client({
@@ -178,22 +177,34 @@ export async function getCategories() {
  */
 export async function getArticles(categoryId?: string, isPopular?: boolean) {
   try {
-    // Create a "Pages" database if it doesn't exist
-    const DATABASE_ID = "1ebc922b6d5b80729c9dd0d4f7ccf567"; // Using the same database for now
+    // Using the direct DATABASE_ID for the FAQ database
+    const DATABASE_ID = "1ebc922b6d5b80729c9dd0d4f7ccf567";
     
-    // Use properly formatted filter object
-    const queryOptions: any = {
-      database_id: DATABASE_ID
-    };
-
+    // Build the filter combining category and isPopular if needed
+    let filter: any = {};
+    
     if (categoryId) {
-      queryOptions.filter = {
+      filter = {
         property: "category",
         select: {
           equals: categoryId
         }
       };
     }
+    
+    // Use properly formatted query options
+    const queryOptions: any = {
+      database_id: DATABASE_ID,
+      filter: filter
+    };
+    
+    // Sort by category to group related items together
+    queryOptions.sorts = [
+      {
+        property: "category",
+        direction: "ascending"
+      }
+    ];
 
     const response = await notion.databases.query(queryOptions);
     
@@ -207,7 +218,7 @@ export async function getArticles(categoryId?: string, isPopular?: boolean) {
         content: properties.answer?.rich_text?.[0]?.plain_text || "",
         categoryId: properties.category?.select?.id || "",
         categoryName: properties.category?.select?.name || "Uncategorized",
-        isPopular: false, // We don't have this property in FAQs but we can add it later
+        isPopular: false, // Set isPopular to false as default - we're only using real Notion data
         createdAt: page.created_time,
         updatedAt: page.last_edited_time
       };
