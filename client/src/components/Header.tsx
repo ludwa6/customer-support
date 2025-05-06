@@ -1,11 +1,22 @@
 import { useState } from "react";
 import { Link } from "wouter";
+import TicketForm from "@/components/TicketForm";
+import { Button } from "@/components/ui/button";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isTicketFormOpen, setIsTicketFormOpen] = useState(false);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+  
+  const openTicketForm = () => {
+    setIsTicketFormOpen(true);
+    // Close mobile menu if it's open
+    if (isMobileMenuOpen) {
+      setIsMobileMenuOpen(false);
+    }
   };
 
   return (
@@ -42,6 +53,12 @@ const Header = () => {
             <Link href="/documentation" className="text-gray-500 hover:text-primary font-medium">
               Documentation
             </Link>
+            <button 
+              onClick={openTicketForm} 
+              className="text-gray-500 hover:text-primary font-medium"
+            >
+              Submit a Ticket
+            </button>
           </nav>
           
           <button 
@@ -77,8 +94,20 @@ const Header = () => {
           <Link href="/documentation" className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-primary hover:bg-gray-50">
             Documentation
           </Link>
+          <button 
+            onClick={openTicketForm}
+            className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-primary hover:bg-gray-50"
+          >
+            Submit a Ticket
+          </button>
         </div>
       </div>
+      
+      {/* Ticket Form Dialog */}
+      <TicketForm 
+        isOpen={isTicketFormOpen} 
+        onClose={() => setIsTicketFormOpen(false)} 
+      />
     </header>
   );
 };
