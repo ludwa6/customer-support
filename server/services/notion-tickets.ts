@@ -3,48 +3,14 @@ import { notion, NOTION_PAGE_ID, findDatabaseByTitle, createDatabaseIfNotExists,
 import { tickets } from "@shared/schema";
 import { storage } from "../storage";
 
-// Database ID for support tickets
-let SUPPORT_TICKETS_DATABASE_ID: string | null = null;
+// Database ID for support tickets - extracted directly from the URL
+const SUPPORT_TICKETS_DATABASE_ID = "1ebc922b6d5b8006b3d0c0b013b4f2fb";
 
 /**
- * Find or create the Support Tickets database in Notion
+ * Get the Support Tickets database ID
  */
 export async function getSupportTicketsDatabase() {
-  // If we already have the database ID, return it
-  if (SUPPORT_TICKETS_DATABASE_ID) {
-    return SUPPORT_TICKETS_DATABASE_ID;
-  }
-  
-  try {
-    // Try to find existing database
-    console.log("Looking for database with title 'Support Tickets'");
-    const databases = await getNotionDatabases();
-    console.log("Found databases:", databases.map(db => {
-      // Extract title if available
-      let title = "Unknown";
-      try {
-        if (db.title && Array.isArray(db.title) && db.title.length > 0) {
-          title = db.title[0]?.plain_text || "Unknown";
-        }
-      } catch (e) {}
-      return { id: db.id, title };
-    }));
-    
-    const existingDb = await findDatabaseByTitle("Support Tickets");
-    console.log("Found database matching 'Support Tickets':", existingDb ? existingDb.id : "none");
-    
-    if (existingDb) {
-      SUPPORT_TICKETS_DATABASE_ID = existingDb.id;
-      return existingDb.id;
-    }
-    
-    // We're not going to create a new database, since you already have one
-    // Just throw an error if we can't find the existing database
-    throw new Error("Could not find Support Tickets database in Notion. Please make sure it exists and the integration has access.");
-  } catch (error) {
-    console.error("Error getting Support Tickets database:", error);
-    throw error;
-  }
+  return SUPPORT_TICKETS_DATABASE_ID;
 }
 
 /**
