@@ -17,6 +17,19 @@ const Documentation = () => {
   // Update active tab when category changes in URL
   useEffect(() => {
     setActiveTab(categoryId || "all");
+    
+    // Add event listener for URL changes
+    const handleUrlChange = () => {
+      const params = new URLSearchParams(window.location.search);
+      const newCategoryId = params.get("category");
+      setActiveTab(newCategoryId || "all");
+    };
+
+    window.addEventListener("popstate", handleUrlChange);
+    
+    return () => {
+      window.removeEventListener("popstate", handleUrlChange);
+    };
   }, [categoryId]);
   
   // Fetch categories
@@ -106,6 +119,11 @@ const Documentation = () => {
                               <p key={idx} className="mb-2">{paragraph}</p>
                             ))}
                           </div>
+                          <div className="mt-2">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              {article.categoryName}
+                            </span>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -142,6 +160,11 @@ const Documentation = () => {
                                 {article.content.split('\n').map((paragraph, idx) => (
                                   <p key={idx} className="mb-2">{paragraph}</p>
                                 ))}
+                              </div>
+                              <div className="mt-2">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                  {article.categoryName}
+                                </span>
                               </div>
                             </div>
                           ))}
