@@ -132,11 +132,7 @@ const Documentation = () => {
                               <p key={idx} className="mb-2">{paragraph}</p>
                             ))}
                           </div>
-                          <div className="mt-4 pt-2 border-t border-gray-100">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                              {article.categoryName}
-                            </span>
-                          </div>
+
                         </div>
                       ))}
                     </div>
@@ -172,11 +168,7 @@ const Documentation = () => {
                                 <p key={idx} className="mb-2">{paragraph}</p>
                               ))}
                             </div>
-                            <div className="mt-4 pt-2 border-t border-gray-100">
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                {article.categoryName}
-                              </span>
-                            </div>
+
                           </div>
                         ))}
                       </div>
