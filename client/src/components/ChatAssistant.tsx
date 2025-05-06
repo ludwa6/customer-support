@@ -8,7 +8,6 @@ import { v4 as uuidv4 } from "uuid";
 const ChatAssistant = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [inputMessage, setInputMessage] = useState("");
-  const [sessionId, setSessionId] = useState<string>("");
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "welcome",
@@ -19,56 +18,10 @@ const ChatAssistant = () => {
   ]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-  
-  // Load session ID from localStorage or create a new one when the component mounts
-  useEffect(() => {
-    // Try to get existing session ID from localStorage
-    const savedSessionId = localStorage.getItem('chat_session_id');
-    
-    if (savedSessionId) {
-      // Use the existing session ID
-      setSessionId(savedSessionId);
-      console.log('Restored chat session:', savedSessionId);
-    } else {
-      // Create a new session ID
-      const newSessionId = uuidv4();
-      setSessionId(newSessionId);
-      localStorage.setItem('chat_session_id', newSessionId);
-      console.log('Created new chat session:', newSessionId);
-    }
-  }, []);
 
   // Function to handle opening and closing the chat widget
   const toggleChat = () => {
     setIsChatOpen(!isChatOpen);
-  };
-  
-  // Function to reset the chat session
-  const resetChatSession = () => {
-    // Create a new session ID
-    const newSessionId = uuidv4();
-    
-    // Update the session ID
-    setSessionId(newSessionId);
-    localStorage.setItem('chat_session_id', newSessionId);
-    
-    // Reset the messages to just the welcome message
-    setMessages([
-      {
-        id: "welcome",
-        content: "👋 Hi there! I'm your SerenityFlow AI assistant. I can help with product questions, troubleshooting, and guide you to the right resources. How can I help you today?",
-        role: "assistant",
-        timestamp: new Date()
-      }
-    ]);
-    
-    toast({
-      title: "Chat Reset",
-      description: "Your chat session has been reset.",
-      variant: "default"
-    });
-    
-    console.log('Chat session reset. New session ID:', newSessionId);
   };
 
   // Scroll to the bottom of the messages container when new messages are added
@@ -81,11 +34,7 @@ const ChatAssistant = () => {
   // API call to get AI response
   const sendMessageMutation = useMutation({
     mutationFn: async (message: string) => {
-      // Include the sessionId in the API request
-      const response = await apiRequest("POST", "/api/chat", { 
-        message,
-        sessionId // Send the session ID with each message
-      });
+      const response = await apiRequest("POST", "/api/chat", { message });
       return response.json();
     },
     onSuccess: (data) => {
@@ -96,11 +45,6 @@ const ChatAssistant = () => {
         timestamp: new Date()
       };
       setMessages((prev) => [...prev, newMessage]);
-      
-      // If the server returns a different sessionId, update ours
-      if (data.sessionId && data.sessionId !== sessionId) {
-        setSessionId(data.sessionId);
-      }
     },
     onError: (error) => {
       toast({
@@ -127,11 +71,6 @@ const ChatAssistant = () => {
     };
     
     setMessages((prev) => [...prev, userMessage]);
-    
-    // Make sure we have a session ID before sending
-    if (!sessionId) {
-      setSessionId(uuidv4());
-    }
     
     // Call API to get response
     sendMessageMutation.mutate(inputMessage);
@@ -190,49 +129,24 @@ const ChatAssistant = () => {
                   />
                 </svg>
                 <h3 className="font-medium">AI Support Assistant</h3>
-                <span className="ml-2 text-xs bg-black bg-opacity-20 px-2 py-1 rounded-full">
-                  ID: {sessionId.substring(0, 8)}
-                </span>
               </div>
-              <div className="flex items-center">
-                <button 
-                  onClick={resetChatSession}
-                  className="text-white hover:text-gray-200 focus:outline-none mr-3"
-                  title="Reset chat session"
+              <button 
+                onClick={toggleChat}
+                className="text-white hover:text-gray-200 focus:outline-none"
+              >
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  className="h-5 w-5" 
+                  viewBox="0 0 20 20" 
+                  fill="currentColor"
                 >
-                  <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    className="h-5 w-5" 
-                    fill="none" 
-                    viewBox="0 0 24 24" 
-                    stroke="currentColor"
-                  >
-                    <path 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      strokeWidth={2} 
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" 
-                    />
-                  </svg>
-                </button>
-                <button 
-                  onClick={toggleChat}
-                  className="text-white hover:text-gray-200 focus:outline-none"
-                >
-                  <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    className="h-5 w-5" 
-                    viewBox="0 0 20 20" 
-                    fill="currentColor"
-                  >
-                    <path 
-                      fillRule="evenodd" 
-                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" 
-                      clipRule="evenodd" 
-                    />
-                  </svg>
-                </button>
-              </div>
+                  <path 
+                    fillRule="evenodd" 
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" 
+                    clipRule="evenodd" 
+                  />
+                </svg>
+              </button>
             </div>
             
             {/* Chat Messages */}

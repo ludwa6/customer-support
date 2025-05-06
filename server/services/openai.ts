@@ -37,7 +37,7 @@ export async function generateAIResponse(userMessage: string): Promise<string> {
     
     // Create system message with context and instructions
     const systemMessage = `
-      You are an AI assistant for SerenityFlow, a mindfulness and meditation application. 
+      You are an AI assistant for SerenityFlow, a workflow automation platform. 
       Your task is to help users with their questions about the platform.
       
       Use the following FAQ data to answer questions:
@@ -49,8 +49,6 @@ export async function generateAIResponse(userMessage: string): Promise<string> {
       3. Don't make up information or pretend to know something you don't
       
       Be concise, professional, and helpful. Format your responses with proper spacing and structure.
-
-      Be sure to only answer questions about SerenityFlow and the SerenityFlow app.
     `;
     
     // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
@@ -73,11 +71,35 @@ export async function generateAIResponse(userMessage: string): Promise<string> {
 
 /**
  * Analyze user message to determine if it should be redirected to support
- * 
- * This function has been modified to always return false, as per user request.
- * The redirect to support functionality has been disabled.
  */
 export async function shouldRedirectToSupport(userMessage: string): Promise<boolean> {
-  // Always return false - no redirection to support
-  return false;
+  try {
+    // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        { 
+          role: "system", 
+          content: "You are an AI assistant that determines if a user question should be redirected to human support. Answer with JSON: { \"redirect\": true/false }" 
+        },
+        { 
+          role: "user", 
+          content: `Analyze this question and determine if it should be redirected to human support: "${userMessage}". Redirect if: 1) It's a complex technical issue, 2) It's about account-specific details, 3) It's about billing/payments, or 4) The user is expressing frustration or urgency.` 
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.3
+    });
+    
+    try {
+      const result = JSON.parse(response.choices[0].message.content);
+      return result.redirect === true;
+    } catch (e) {
+      console.error("Failed to parse OpenAI response:", e);
+      return false;
+    }
+  } catch (error) {
+    console.error("Error determining if support redirection is needed:", error);
+    return false;
+  }
 }

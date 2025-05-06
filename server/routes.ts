@@ -132,36 +132,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Chat API
   app.post('/api/chat', async (req, res) => {
     try {
-      const { message, sessionId } = req.body;
+      const { message } = req.body;
       
       if (!message) {
         return res.status(400).json({ message: 'Message is required' });
       }
       
+      // Check if the message should be redirected to support
+      const shouldRedirect = await shouldRedirectToSupport(message);
+      
+      if (shouldRedirect) {
+        return res.json({
+          response: "I'm not able to fully address this question. For more personalized help, please submit a support ticket using the form below, and our team will get back to you within 24 hours.",
+          shouldRedirect: true
+        });
+      }
+      
       // Generate AI response
       const response = await generateAIResponse(message);
       
-      // Record the conversation in Notion if sessionId is provided
-      if (sessionId && process.env.NOTION_INTEGRATION_SECRET && NOTION_PAGE_ID) {
-        try {
-          const { recordChatConversation } = await import('./services/notion');
-          // Record conversation asynchronously - don't wait for it to complete
-          recordChatConversation(sessionId, message, response)
-            .then((result) => {
-              if (result) {
-                console.log(`Chat conversation for session ${sessionId.substring(0, 8)} recorded in Notion`);
-              } else {
-                console.log(`Failed to record chat conversation for session ${sessionId.substring(0, 8)}`);
-              }
-            })
-            .catch(err => console.error('Failed to record chat conversation:', err));
-        } catch (notionError) {
-          console.error('Error importing or using Notion service:', notionError);
-          // Continue - don't let Notion recording failure affect the API response
-        }
-      }
-      
-      res.json({ response, sessionId });
+      res.json({ response, shouldRedirect: false });
     } catch (error) {
       console.error('Error generating chat response:', error);
       res.status(500).json({ message: 'Failed to generate response' });
