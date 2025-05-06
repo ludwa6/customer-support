@@ -38,15 +38,13 @@ const PopularArticlesList: React.FC<PopularArticlesListProps> = ({
       ) : filteredArticles.length > 0 ? (
         <div className="space-y-3">
           {filteredArticles.map(article => (
-            <Link key={article.id} href={`/article/${article.id}`}>
-              <a className="block p-3 rounded-md hover:bg-gray-50">
+            <Link key={article.id} href={`/article/${article.id}`} className="block p-3 rounded-md hover:bg-gray-50">
                 <h3 className="text-md font-medium text-primary mb-1">{article.title}</h3>
                 <p className="text-sm text-gray-500">
                   {article.content.length > 100 
                     ? `${article.content.substring(0, 100)}...` 
                     : article.content}
                 </p>
-              </a>
             </Link>
           ))}
         </div>
