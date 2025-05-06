@@ -1,0 +1,142 @@
+import { Client } from "@notionhq/client";
+
+// Initialize Notion client
+const notion = new Client({
+  auth: process.env.NOTION_INTEGRATION_SECRET
+});
+
+// Use the provided database ID directly
+const DATABASE_ID = "1ebc922b6d5b80729c9dd0d4f7ccf567";
+
+async function populateFAQs() {
+  console.log("Adding FAQs to the database...");
+
+  const faqs = [
+    {
+      Question: "How do I reset my password?",
+      Answer: "To reset your password, go to the login page and click on 'Forgot Password'. Enter your email address, and we'll send you a password reset link.",
+      Category: "Account and Subscription"
+    },
+    {
+      Question: "Can I integrate SerenityFlow with my existing tools?",
+      Answer: "Yes! SerenityFlow integrates with over 100 popular tools and services, including Notion, Slack, Google Workspace, Microsoft Office, Trello, Asana, and many more. Visit our Integrations page to see the full list.",
+      Category: "Technical Help"
+    },
+    {
+      Question: "How many workflows can I create on the free plan?",
+      Answer: "The free plan allows you to create up to 5 active workflows with a total of 1,000 operations per month. For unlimited workflows and higher usage limits, consider upgrading to one of our paid plans.",
+      Category: "Account and Subscription"
+    },
+    {
+      Question: "How do I invite team members to my workspace?",
+      Answer: "To invite team members, go to Settings > Team Members, click 'Invite Members', and enter their email addresses. You can also set their roles and permissions during the invitation process.",
+      Category: "Content and Features"
+    },
+    {
+      Question: "Can I schedule workflows to run at specific times?",
+      Answer: "Yes, SerenityFlow supports scheduled workflows. When creating a workflow, select 'Schedule' as your trigger, then specify the timing (hourly, daily, weekly, monthly, or custom cron expressions).",
+      Category: "Content and Features"
+    },
+    {
+      Question: "What happens if my workflow encounters an error?",
+      Answer: "If your workflow encounters an error, SerenityFlow will notify you via email and in the dashboard. You can view detailed error logs and retry failed workflows from the Workflow Monitoring section.",
+      Category: "Technical Help"
+    },
+    {
+      Question: "How do I cancel my subscription?",
+      Answer: "To cancel your subscription, go to Settings > Billing, click 'Manage Subscription', and select 'Cancel Subscription'. Your plan will remain active until the end of your current billing period.",
+      Category: "Account and Subscription"
+    },
+    {
+      Question: "Is my data secure with SerenityFlow?",
+      Answer: "Yes, security is our top priority. SerenityFlow uses industry-standard encryption for all data in transit and at rest. We are SOC 2 compliant and conduct regular security audits. We never store your third-party service credentials in plain text.",
+      Category: "Privacy and Security"
+    },
+    {
+      Question: "How do I get started with SerenityFlow?",
+      Answer: "Getting started is easy! Sign up for a free account, follow our interactive onboarding guide, and check out our Quick Start tutorials. You'll be creating your first workflow in minutes.",
+      Category: "Getting Started"
+    },
+    {
+      Question: "What browsers are supported by SerenityFlow?",
+      Answer: "SerenityFlow supports all modern browsers including Chrome, Firefox, Safari, and Edge. For the best experience, we recommend using the latest version of Chrome or Firefox.",
+      Category: "Technical Help"
+    },
+    {
+      Question: "Can I customize the appearance of my workflows?",
+      Answer: "Yes, SerenityFlow offers various customization options. You can change colors, add custom icons, and organize workflows into folders with your own naming scheme.",
+      Category: "Personalization"
+    },
+    {
+      Question: "How can I contact support?",
+      Answer: "You can reach our support team through the Help button in the app, by emailing support@serenityflow.com, or by using the live chat on our website during business hours.",
+      Category: "Community and Support"
+    }
+  ];
+
+  let successCount = 0;
+  for (const faq of faqs) {
+    console.log(`Adding FAQ: ${faq.Question}`);
+    try {
+      await notion.pages.create({
+        parent: { database_id: DATABASE_ID },
+        properties: {
+          // Using the property names we discovered in the schema
+          question: {
+            title: [
+              {
+                text: {
+                  content: faq.Question
+                }
+              }
+            ]
+          },
+          answer: {
+            rich_text: [
+              {
+                text: {
+                  content: faq.Answer
+                }
+              }
+            ]
+          },
+          category: {
+            select: {
+              name: faq.Category
+            }
+          }
+        }
+      });
+      successCount++;
+      console.log(`✅ Successfully added FAQ: ${faq.Question}`);
+    } catch (error) {
+      console.error(`❌ Error adding FAQ ${faq.Question}:`, error);
+    }
+  }
+  
+  return successCount;
+}
+
+// Main function to run the setup and seeding
+async function main() {
+  try {
+    // Check if we have the required environment variable
+    if (!process.env.NOTION_INTEGRATION_SECRET) {
+      console.error("Missing required environment variable: NOTION_INTEGRATION_SECRET");
+      console.error("Please set this variable and try again.");
+      process.exit(1);
+    }
+
+    // Add FAQs
+    const successCount = await populateFAQs();
+    
+    console.log(`🎉 Successfully added ${successCount} FAQs to the Notion database!`);
+    console.log("You can now refresh your application to see the content.");
+  } catch (error) {
+    console.error("❌ Setup failed:", error);
+    process.exit(1);
+  }
+}
+
+// Run the main function
+main();

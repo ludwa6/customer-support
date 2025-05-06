@@ -143,30 +143,33 @@ export async function queryDatabase(databaseId: string, filter = {}, sorts = [])
 }
 
 /**
- * Get all categories from the Categories database
+ * Get all categories from the FAQ database
  */
 export async function getCategories() {
   try {
-    const categoriesDb = await findDatabaseByTitle("Categories");
-    if (!categoriesDb) {
-      return [];
-    }
-
-    const results = await queryDatabase(categoriesDb.id);
+    // Using the direct DATABASE_ID since we know it now
+    const DATABASE_ID = "1ebc922b6d5b80729c9dd0d4f7ccf567";
     
-    return results.map((page: any) => {
-      const properties = page.properties;
-      
-      return {
-        id: page.id,
-        name: properties.Name?.title?.[0]?.plain_text || "Untitled Category",
-        description: properties.Description?.rich_text?.[0]?.plain_text || "",
-        icon: properties.Icon?.rich_text?.[0]?.plain_text || "",
-      };
+    // Retrieve the database to get category options
+    const dbInfo = await notion.databases.retrieve({
+      database_id: DATABASE_ID
     });
+
+    // Extract category options from the database properties
+    const categoryProperty = dbInfo.properties.category;
+    if (categoryProperty && categoryProperty.type === 'select' && categoryProperty.select.options) {
+      return categoryProperty.select.options.map(option => ({
+        id: option.id,
+        name: option.name,
+        description: `${option.name} category for SerenityFlow`,
+        icon: option.color || "default",
+      }));
+    }
+    
+    return [];
   } catch (error) {
     console.error("Error fetching categories from Notion:", error);
-    throw error;
+    return []; // Return empty array instead of throwing to prevent app crashes
   }
 }
 
@@ -255,37 +258,38 @@ export async function getArticleById(articleId: string) {
  */
 export async function getFAQs(categoryId?: string) {
   try {
-    const faqsDb = await findDatabaseByTitle("FAQs");
-    if (!faqsDb) {
-      return [];
-    }
-
+    // Using the direct DATABASE_ID since we know it now
+    const DATABASE_ID = "1ebc922b6d5b80729c9dd0d4f7ccf567";
+    
     let filter = {};
     
     if (categoryId) {
       filter = {
-        property: "CategoryId",
-        rich_text: {
+        property: "category",
+        select: {
           equals: categoryId
         }
       };
     }
 
-    const results = await queryDatabase(faqsDb.id, filter);
+    const response = await notion.databases.query({
+      database_id: DATABASE_ID,
+      filter
+    });
     
-    return results.map((page: any) => {
+    return response.results.map((page: any) => {
       const properties = page.properties;
       
       return {
         id: page.id,
-        question: properties.Question?.title?.[0]?.plain_text || "Untitled Question",
-        answer: properties.Answer?.rich_text?.[0]?.plain_text || "",
-        categoryId: properties.CategoryId?.rich_text?.[0]?.plain_text || "",
-        categoryName: properties.CategoryName?.rich_text?.[0]?.plain_text || "Uncategorized"
+        question: properties.question?.title?.[0]?.plain_text || "Untitled Question",
+        answer: properties.answer?.rich_text?.[0]?.plain_text || "",
+        categoryId: properties.category?.select?.id || "",
+        categoryName: properties.category?.select?.name || "Uncategorized"
       };
     });
   } catch (error) {
     console.error("Error fetching FAQs from Notion:", error);
-    throw error;
+    return []; // Return empty array instead of throwing to prevent app crashes
   }
 }
