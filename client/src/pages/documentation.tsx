@@ -10,8 +10,9 @@ const Documentation = () => {
   const [location] = useLocation();
   const searchParams = new URLSearchParams(window.location.search);
   const categoryId = searchParams.get("category");
+  const searchQueryParam = searchParams.get("search") || "";
   
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(searchQueryParam);
   const [activeTab, setActiveTab] = useState<string>(categoryId || "all");
   
   // Update active tab when category changes in URL

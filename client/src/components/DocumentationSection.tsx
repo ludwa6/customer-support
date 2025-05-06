@@ -1,21 +1,43 @@
 import { useQuery } from "@tanstack/react-query";
-import { Category } from "@/types";
+import { Category, Article } from "@/types";
 import SearchBar from "./SearchBar";
 import CategoryCard from "./CategoryCard";
 import { useState } from "react";
+import { Link, useLocation } from "wouter";
 
 const DocumentationSection = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [_, setLocation] = useLocation();
   
   // Fetch categories from API
   const { data: categories, isLoading: isCategoriesLoading } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
   });
 
+  // Fetch all articles for search
+  const { data: articles, isLoading: isArticlesLoading } = useQuery<Article[]>({
+    queryKey: ["/api/articles"],
+    // Only fetch when search query is entered
+    enabled: searchQuery.length > 0,
+  });
+
   // Handle search query change
   const handleSearch = (query: string) => {
     setSearchQuery(query);
+    
+    // If search query is not empty, navigate to the documentation page with search query
+    if (query.trim()) {
+      setLocation(`/documentation?search=${encodeURIComponent(query)}`);
+    }
   };
+
+  // Filter articles based on search query
+  const filteredArticles = searchQuery && articles 
+    ? articles.filter(article => 
+        article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        article.content.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : [];
 
   return (
     <div className="w-full md:w-2/3 documentation-section">
@@ -26,6 +48,56 @@ const DocumentationSection = () => {
           
           {/* Search Bar */}
           <SearchBar onSearch={handleSearch} />
+          
+          {/* Search Results (will only show when there are search results) */}
+          {searchQuery && filteredArticles.length > 0 && (
+            <div className="mt-4 p-4 bg-blue-50 rounded-md">
+              <div className="flex justify-between items-center mb-2">
+                <p className="text-sm font-medium text-blue-800">
+                  {filteredArticles.length} result{filteredArticles.length !== 1 ? 's' : ''} found for "{searchQuery}"
+                </p>
+                <Link href="/documentation">
+                  <span className="text-blue-600 hover:underline text-sm cursor-pointer">
+                    View all results
+                  </span>
+                </Link>
+              </div>
+              <ul className="divide-y divide-blue-100">
+                {filteredArticles.slice(0, 3).map(article => (
+                  <li key={article.id} className="py-2">
+                    <Link href={`/documentation?category=${article.categoryId}`}>
+                      <div className="block cursor-pointer">
+                        <h3 className="text-md font-medium text-primary mb-1 hover:underline">
+                          {article.title}
+                        </h3>
+                        <p className="text-sm text-gray-600 line-clamp-2">
+                          {article.content}
+                        </p>
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              {filteredArticles.length > 3 && (
+                <div className="mt-2 text-center">
+                  <Link href={`/documentation?search=${encodeURIComponent(searchQuery)}`}>
+                    <span className="text-sm text-blue-600 hover:underline cursor-pointer">
+                      See all {filteredArticles.length} results
+                    </span>
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* No Results Message */}
+          {searchQuery && filteredArticles.length === 0 && !isArticlesLoading && (
+            <div className="mt-4 p-4 bg-gray-50 rounded-md">
+              <p className="text-sm text-gray-600">
+                No results found for "{searchQuery}". Try a different search term or browse by category.
+              </p>
+            </div>
+          )}
         </div>
         
         {/* Documentation Categories */}
