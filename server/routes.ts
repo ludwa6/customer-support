@@ -1,6 +1,5 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
 import { NOTION_PAGE_ID, getCategories, getArticles, getArticleById, getFAQs } from "./services/notion";
 import { generateAIResponse, shouldRedirectToSupport } from "./services/openai";
 import multer from "multer";

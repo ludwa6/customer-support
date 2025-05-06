@@ -22,6 +22,8 @@ import { X } from "lucide-react";
 const ticketFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
+  subject: z.string().min(5, "Subject must be at least 5 characters"),
+  category: z.string().min(1, "Please select a category"),
   description: z.string().min(10, "Description must be at least 10 characters"),
 });
 
@@ -40,6 +42,8 @@ const TicketForm: React.FC<TicketFormProps> = ({ isOpen, onClose }) => {
     defaultValues: {
       name: "",
       email: "",
+      subject: "",
+      category: "General",
       description: "",
     },
   });
@@ -121,6 +125,49 @@ const TicketForm: React.FC<TicketFormProps> = ({ isOpen, onClose }) => {
                 )}
               />
               
+              <FormField
+                control={form.control}
+                name="subject"
+                render={({ field }) => (
+                  <FormItem className="sm:col-span-2">
+                    <FormLabel>Subject</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Brief description of your issue" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem className="sm:col-span-2">
+                    <FormLabel>Category</FormLabel>
+                    <Select 
+                      defaultValue={field.value} 
+                      onValueChange={field.onChange}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a category" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="General">General</SelectItem>
+                        <SelectItem value="Account">Account</SelectItem>
+                        <SelectItem value="Billing">Billing</SelectItem>
+                        <SelectItem value="Technical">Technical</SelectItem>
+                        <SelectItem value="Feature Request">Feature Request</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
               <div className="sm:col-span-2">
                 <FormField
                   control={form.control}
@@ -140,8 +187,6 @@ const TicketForm: React.FC<TicketFormProps> = ({ isOpen, onClose }) => {
                   )}
                 />
               </div>
-              
-              {/* Attachments section removed */}
             </div>
             
             <DialogFooter>
