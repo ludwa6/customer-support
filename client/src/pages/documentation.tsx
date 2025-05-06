@@ -24,7 +24,9 @@ const Documentation = () => {
     queryFn: async () => {
       const response = await fetch(`/api/articles${categoryId ? `?categoryId=${categoryId}` : ''}`);
       if (!response.ok) throw new Error("Failed to fetch articles");
-      return response.json();
+      const data = await response.json();
+      console.log("Fetched articles:", data);
+      return data;
     },
   });
   
