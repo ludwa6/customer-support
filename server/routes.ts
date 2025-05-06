@@ -161,10 +161,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Set default values for subject and category if not provided
       const subject = req.body.subject || 'Support Request';
-      const category = req.body.category || 'other';
+      const category = req.body.category || 'General';
       
-      // Create the ticket in local database
-      const newTicket = await storage.insertTicket({
+      // Verify Notion integration is configured
+      if (!process.env.NOTION_INTEGRATION_SECRET || !NOTION_PAGE_ID) {
+        return res.status(503).json({ 
+          message: 'Notion integration is not configured. Please set up the required environment variables.'
+        });
+      }
+      
+      // Create new ticket directly in Notion
+      const { addTicket } = await import('./services/notion-tickets');
+      const newTicket = await addTicket({
         name,
         email,
         subject,
@@ -173,17 +181,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: 'new',
         createdAt: new Date()
       });
-      
-      // Try to add the ticket to Notion if integration is configured
-      if (process.env.NOTION_INTEGRATION_SECRET && process.env.NOTION_PAGE_URL) {
-        try {
-          const { addTicketToNotion } = await import('./services/notion-tickets');
-          await addTicketToNotion(newTicket);
-        } catch (notionError) {
-          console.error('Error adding ticket to Notion:', notionError);
-          // We don't fail the request if Notion integration fails
-        }
-      }
       
       res.status(201).json({
         message: 'Ticket submitted successfully',
@@ -195,10 +192,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Get tickets
+  // Get tickets from Notion
   app.get('/api/tickets', async (req, res) => {
     try {
-      const tickets = await storage.getTickets();
+      // Verify Notion integration is configured
+      if (!process.env.NOTION_INTEGRATION_SECRET || !NOTION_PAGE_ID) {
+        return res.status(503).json({ 
+          message: 'Notion integration is not configured. Please set up the required environment variables.'
+        });
+      }
+      
+      const { getTickets } = await import('./services/notion-tickets');
+      const tickets = await getTickets();
       res.json(tickets);
     } catch (error) {
       console.error('Error fetching tickets:', error);
@@ -206,16 +211,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Get ticket by ID
+  // Get ticket by ID from Notion
   app.get('/api/tickets/:id', async (req, res) => {
     try {
-      const ticketId = parseInt(req.params.id);
+      const ticketId = req.params.id;
       
-      if (isNaN(ticketId)) {
-        return res.status(400).json({ message: 'Invalid ticket ID' });
+      // Verify Notion integration is configured
+      if (!process.env.NOTION_INTEGRATION_SECRET || !NOTION_PAGE_ID) {
+        return res.status(503).json({ 
+          message: 'Notion integration is not configured. Please set up the required environment variables.'
+        });
       }
       
-      const ticket = await storage.getTicketById(ticketId);
+      const { getTicketById } = await import('./services/notion-tickets');
+      const ticket = await getTicketById(ticketId);
       
       if (!ticket) {
         return res.status(404).json({ message: 'Ticket not found' });
@@ -228,36 +237,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Update ticket status
+  // Update ticket status in Notion
   app.patch('/api/tickets/:id/status', async (req, res) => {
     try {
-      const ticketId = parseInt(req.params.id);
+      const ticketId = req.params.id;
       const { status } = req.body;
-      
-      if (isNaN(ticketId)) {
-        return res.status(400).json({ message: 'Invalid ticket ID' });
-      }
       
       if (!status || !['new', 'in-progress', 'resolved', 'closed'].includes(status)) {
         return res.status(400).json({ message: 'Invalid status' });
       }
       
-      const updatedTicket = await storage.updateTicketStatus(ticketId, status);
-      
-      if (!updatedTicket) {
-        return res.status(404).json({ message: 'Ticket not found' });
+      // Verify Notion integration is configured
+      if (!process.env.NOTION_INTEGRATION_SECRET || !NOTION_PAGE_ID) {
+        return res.status(503).json({ 
+          message: 'Notion integration is not configured. Please set up the required environment variables.'
+        });
       }
       
-      // Try to update the status in Notion if integration is configured
-      if (process.env.NOTION_INTEGRATION_SECRET && process.env.NOTION_PAGE_URL) {
-        try {
-          const { addTicketToNotion } = await import('./services/notion-tickets');
-          await addTicketToNotion(updatedTicket);
-        } catch (notionError) {
-          console.error('Error updating ticket in Notion:', notionError);
-          // We don't fail the request if Notion integration fails
-        }
-      }
+      const { updateTicketStatus } = await import('./services/notion-tickets');
+      const updatedTicket = await updateTicketStatus(ticketId, status);
       
       res.json({
         message: 'Ticket status updated successfully',
