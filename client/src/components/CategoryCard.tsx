@@ -51,8 +51,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
   const icon = iconMap[category.name] || iconMap.default;
 
   return (
-    <Link href={`/documentation?category=${category.id}`}>
-      <a className="block group">
+    <Link href={`/documentation?category=${category.id}`} className="block group">
         <div className="border border-gray-200 rounded-lg p-4 transition duration-150 ease-in-out hover:bg-gray-50 hover:border-primary">
           <div className="flex items-center mb-2">
             <div className="bg-primary/10 p-2 rounded-lg mr-3">
@@ -62,7 +61,6 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
           </div>
           <p className="text-sm text-gray-500">{category.description}</p>
         </div>
-      </a>
     </Link>
   );
 };

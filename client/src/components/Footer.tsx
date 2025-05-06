@@ -25,14 +25,14 @@ const Footer = () => {
             <span className="text-sm text-gray-500">© {new Date().getFullYear()} SerenityFlow. All rights reserved.</span>
           </div>
           <div className="flex space-x-6">
-            <Link href="/privacy">
-              <a className="text-sm text-gray-500 hover:text-primary">Privacy Policy</a>
+            <Link href="/privacy" className="text-sm text-gray-500 hover:text-primary">
+              Privacy Policy
             </Link>
-            <Link href="/terms">
-              <a className="text-sm text-gray-500 hover:text-primary">Terms of Service</a>
+            <Link href="/terms" className="text-sm text-gray-500 hover:text-primary">
+              Terms of Service
             </Link>
-            <Link href="/#contact">
-              <a className="text-sm text-gray-500 hover:text-primary">Contact Us</a>
+            <Link href="/#contact" className="text-sm text-gray-500 hover:text-primary">
+              Contact Us
             </Link>
           </div>
         </div>

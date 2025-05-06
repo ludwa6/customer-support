@@ -2,6 +2,7 @@ import { useState } from "react";
 import DocumentationSection from "@/components/DocumentationSection";
 import ChatAssistant from "@/components/ChatAssistant";
 import TicketForm from "@/components/TicketForm";
+import FAQSection from "@/components/FAQSection";
 import { Button } from "@/components/ui/button";
 
 const Home = () => {
@@ -19,8 +20,13 @@ const Home = () => {
         </div>
       </div>
       
+      {/* FAQ Section */}
+      <div className="w-full">
+        <FAQSection />
+      </div>
+      
       {/* Submit Ticket Section */}
-      <div className="max-w-7xl mx-auto mt-8">
+      <div id="contact" className="max-w-7xl mx-auto mt-8">
         <div className="w-full md:w-2/3">
           <h2 className="text-lg font-semibold text-text mb-4">Still Need Help?</h2>
           <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">

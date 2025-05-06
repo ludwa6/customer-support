@@ -51,7 +51,7 @@ const FAQSection = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
-              {!isCategoriesLoading && categories?.map(category => (
+              {!isCategoriesLoading && categories?.map((category: { id: string, name: string }) => (
                 <SelectItem key={category.id} value={category.id}>
                   {category.name}
                 </SelectItem>
