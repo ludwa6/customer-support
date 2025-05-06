@@ -25,20 +25,6 @@ export async function addTicketToNotion(ticket: any) {
       throw new Error("Could not find or create Support Tickets database");
     }
     
-    // Format attachments as a string (if any)
-    let attachmentsText = "";
-    
-    if (ticket.attachments) {
-      try {
-        const attachments = JSON.parse(ticket.attachments);
-        attachmentsText = attachments.map((attachment: any) => 
-          `${attachment.originalName} (${attachment.size} bytes)`
-        ).join("\n");
-      } catch (e) {
-        attachmentsText = String(ticket.attachments);
-      }
-    }
-    
     // Log the database ID we're using
     console.log(`Adding ticket to Notion database with ID: ${databaseId}`);
     
@@ -68,14 +54,9 @@ export async function addTicketToNotion(ticket: any) {
               }
             }
           ]
-        },
-        // For Notion's files property type, we can't upload files directly
-        // So we'll just leave it empty for now
-        attachments: {
-          files: []
         }
       },
-      // Add attachments information to the page content
+      // Add detailed content to the page
       children: [
         {
           object: "block",
@@ -125,24 +106,7 @@ export async function addTicketToNotion(ticket: any) {
           paragraph: {
             rich_text: [{ type: "text", text: { content: ticket.description } }]
           }
-        },
-        // Only add attachments section if there are attachments
-        ...(attachmentsText ? [
-          {
-            object: "block",
-            type: "heading_3",
-            heading_3: {
-              rich_text: [{ type: "text", text: { content: "Attachments" } }]
-            }
-          },
-          {
-            object: "block",
-            type: "paragraph",
-            paragraph: {
-              rich_text: [{ type: "text", text: { content: attachmentsText } }]
-            }
-          }
-        ] : [])
+        }
       ]
     });
     
