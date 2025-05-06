@@ -1,5 +1,5 @@
 import { Client } from "@notionhq/client";
-import { notion, NOTION_PAGE_ID, findDatabaseByTitle, createDatabaseIfNotExists } from "./notion";
+import { notion, NOTION_PAGE_ID, findDatabaseByTitle, createDatabaseIfNotExists, getNotionDatabases } from "./notion";
 import { tickets } from "@shared/schema";
 import { storage } from "../storage";
 
@@ -17,7 +17,21 @@ export async function getSupportTicketsDatabase() {
   
   try {
     // Try to find existing database
+    console.log("Looking for database with title 'Support Tickets'");
+    const databases = await getNotionDatabases();
+    console.log("Found databases:", databases.map(db => {
+      // Extract title if available
+      let title = "Unknown";
+      try {
+        if (db.title && Array.isArray(db.title) && db.title.length > 0) {
+          title = db.title[0]?.plain_text || "Unknown";
+        }
+      } catch (e) {}
+      return { id: db.id, title };
+    }));
+    
     const existingDb = await findDatabaseByTitle("Support Tickets");
+    console.log("Found database matching 'Support Tickets':", existingDb ? existingDb.id : "none");
     
     if (existingDb) {
       SUPPORT_TICKETS_DATABASE_ID = existingDb.id;
@@ -58,6 +72,9 @@ export async function addTicketToNotion(ticket: any) {
         attachmentsText = String(ticket.attachments);
       }
     }
+    
+    // Log the database ID we're using
+    console.log(`Adding ticket to Notion database with ID: ${databaseId}`);
     
     // Create the page in Notion
     const response = await notion.pages.create({
