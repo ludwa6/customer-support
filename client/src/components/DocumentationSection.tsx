@@ -47,7 +47,7 @@ const DocumentationSection = () => {
           <p className="text-gray-500">Find answers to your questions or submit a support ticket</p>
           
           {/* Search Bar */}
-          <SearchBar onSearch={handleSearch} />
+          <SearchBar onSearch={handleSearch} initialValue={searchQuery} />
           
           {/* Search Results (will only show when there are search results) */}
           {searchQuery && filteredArticles.length > 0 && (

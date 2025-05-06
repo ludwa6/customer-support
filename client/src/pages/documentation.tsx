@@ -15,7 +15,7 @@ const Documentation = () => {
   const [searchQuery, setSearchQuery] = useState(searchQueryParam);
   const [activeTab, setActiveTab] = useState<string>(categoryId || "all");
   
-  // Update active tab when category changes in URL
+  // Update active tab and search query when URL changes
   useEffect(() => {
     setActiveTab(categoryId || "all");
     
@@ -23,7 +23,10 @@ const Documentation = () => {
     const handleUrlChange = () => {
       const params = new URLSearchParams(window.location.search);
       const newCategoryId = params.get("category");
+      const newSearchQuery = params.get("search") || "";
+      
       setActiveTab(newCategoryId || "all");
+      setSearchQuery(newSearchQuery);
     };
 
     window.addEventListener("popstate", handleUrlChange);
@@ -31,7 +34,7 @@ const Documentation = () => {
     return () => {
       window.removeEventListener("popstate", handleUrlChange);
     };
-  }, [categoryId]);
+  }, [categoryId, searchQueryParam]);
   
   // Fetch categories
   const { data: categories } = useQuery<Category[]>({
@@ -90,7 +93,7 @@ const Documentation = () => {
               </p>
               
               {/* Search Bar */}
-              <SearchBar onSearch={setSearchQuery} />
+              <SearchBar onSearch={setSearchQuery} initialValue={searchQuery} />
             </div>
             
             {/* Categories Tabs */}
