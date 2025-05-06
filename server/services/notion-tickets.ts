@@ -24,37 +24,9 @@ export async function getSupportTicketsDatabase() {
       return existingDb.id;
     }
     
-    // If no database exists, create one
-    const newDb = await createDatabaseIfNotExists("Support Tickets", {
-      Name: {
-        title: {}
-      },
-      Email: {
-        email: {}
-      },
-      Description: {
-        rich_text: {}
-      },
-      Attachments: {
-        rich_text: {}
-      },
-      Status: {
-        select: {
-          options: [
-            { name: "New", color: "blue" },
-            { name: "In Progress", color: "yellow" },
-            { name: "Resolved", color: "green" },
-            { name: "Closed", color: "gray" }
-          ]
-        }
-      },
-      Created: {
-        date: {}
-      }
-    });
-    
-    SUPPORT_TICKETS_DATABASE_ID = newDb.id;
-    return newDb.id;
+    // We're not going to create a new database, since you already have one
+    // Just throw an error if we can't find the existing database
+    throw new Error("Could not find Support Tickets database in Notion. Please make sure it exists and the integration has access.");
   } catch (error) {
     console.error("Error getting Support Tickets database:", error);
     throw error;
@@ -93,7 +65,7 @@ export async function addTicketToNotion(ticket: any) {
         database_id: databaseId
       },
       properties: {
-        Name: {
+        full_name: {
           title: [
             {
               text: {
@@ -102,10 +74,10 @@ export async function addTicketToNotion(ticket: any) {
             }
           ]
         },
-        Email: {
+        email: {
           email: ticket.email
         },
-        Description: {
+        description: {
           rich_text: [
             {
               text: {
@@ -114,7 +86,7 @@ export async function addTicketToNotion(ticket: any) {
             }
           ]
         },
-        Attachments: {
+        attachments: {
           rich_text: attachmentsText ? [
             {
               text: {
@@ -122,18 +94,6 @@ export async function addTicketToNotion(ticket: any) {
               }
             }
           ] : []
-        },
-        Status: {
-          select: {
-            name: ticket.status === "new" ? "New" : 
-                  ticket.status === "in-progress" ? "In Progress" :
-                  ticket.status === "resolved" ? "Resolved" : "Closed"
-          }
-        },
-        Created: {
-          date: {
-            start: ticket.createdAt ? new Date(ticket.createdAt).toISOString() : new Date().toISOString()
-          }
         }
       }
     });
