@@ -60,19 +60,21 @@ export async function addTicketToNotion(ticket: any) {
         email: {
           email: ticket.email
         },
+        // For Notion's files property type, we can't upload files directly
+        attachments: {
+          files: []
+        },
+        
+        // Add description and attachment info
         description: {
           rich_text: [
             {
               text: {
-                content: ticket.description
+                content: ticket.description + (attachmentsText ? 
+                  "\n\n--- Attachments ---\n" + attachmentsText : "")
               }
             }
           ]
-        },
-        // For Notion's files property type, we can't upload files directly
-        // So we'll just leave it empty for now
-        attachments: {
-          files: []
         }
       }
     });
