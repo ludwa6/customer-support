@@ -1,8 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { Category, Article } from "@/types";
+import { Category } from "@/types";
 import SearchBar from "./SearchBar";
 import CategoryCard from "./CategoryCard";
-import PopularArticlesList from "./PopularArticlesList";
 import { useState } from "react";
 
 const DocumentationSection = () => {
@@ -11,11 +10,6 @@ const DocumentationSection = () => {
   // Fetch categories from API
   const { data: categories, isLoading: isCategoriesLoading } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
-  });
-  
-  // Fetch popular articles from API
-  const { data: popularArticles, isLoading: isArticlesLoading } = useQuery<Article[]>({
-    queryKey: ["/api/articles/popular"],
   });
 
   // Handle search query change
@@ -35,7 +29,7 @@ const DocumentationSection = () => {
         </div>
         
         {/* Documentation Categories */}
-        <div className="mb-8">
+        <div>
           <h2 className="text-lg font-semibold text-text mb-4">Browse By Category</h2>
           
           {isCategoriesLoading ? (
@@ -58,13 +52,6 @@ const DocumentationSection = () => {
             </div>
           )}
         </div>
-        
-        {/* Popular Articles */}
-        <PopularArticlesList 
-          articles={popularArticles || []} 
-          isLoading={isArticlesLoading} 
-          searchQuery={searchQuery}
-        />
       </div>
     </div>
   );

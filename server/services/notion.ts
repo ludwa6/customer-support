@@ -180,23 +180,20 @@ export async function getArticles(categoryId?: string, isPopular?: boolean) {
     // Using the direct DATABASE_ID for the FAQ database
     const DATABASE_ID = "1ebc922b6d5b80729c9dd0d4f7ccf567";
     
-    // Build the filter combining category and isPopular if needed
-    let filter: any = {};
+    // Use properly formatted query options
+    const queryOptions: any = {
+      database_id: DATABASE_ID,
+    };
     
+    // Add filter if categoryId is provided
     if (categoryId) {
-      filter = {
+      queryOptions.filter = {
         property: "category",
         select: {
           equals: categoryId
         }
       };
     }
-    
-    // Use properly formatted query options
-    const queryOptions: any = {
-      database_id: DATABASE_ID,
-      filter: filter
-    };
     
     // Sort by category to group related items together
     queryOptions.sorts = [
