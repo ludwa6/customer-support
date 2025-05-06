@@ -38,6 +38,7 @@ const ChatAssistant = () => {
       return response.json();
     },
     onSuccess: (data) => {
+      // The response format is simplified now - no shouldRedirect flag
       const newMessage: ChatMessage = {
         id: uuidv4(),
         content: data.response,
