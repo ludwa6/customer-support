@@ -74,7 +74,76 @@ export async function addTicketToNotion(ticket: any) {
         attachments: {
           files: []
         }
-      }
+      },
+      // Add attachments information to the page content
+      children: [
+        {
+          object: "block",
+          type: "heading_2",
+          heading_2: {
+            rich_text: [{ type: "text", text: { content: "Support Ticket Details" } }]
+          }
+        },
+        {
+          object: "block",
+          type: "paragraph",
+          paragraph: {
+            rich_text: [{ type: "text", text: { content: `Name: ${ticket.name}` } }]
+          }
+        },
+        {
+          object: "block",
+          type: "paragraph",
+          paragraph: {
+            rich_text: [{ type: "text", text: { content: `Email: ${ticket.email}` } }]
+          }
+        },
+        {
+          object: "block",
+          type: "paragraph",
+          paragraph: {
+            rich_text: [{ type: "text", text: { content: `Subject: ${ticket.subject || 'Support Request'}` } }]
+          }
+        },
+        {
+          object: "block",
+          type: "paragraph",
+          paragraph: {
+            rich_text: [{ type: "text", text: { content: `Category: ${ticket.category || 'General'}` } }]
+          }
+        },
+        {
+          object: "block",
+          type: "heading_3",
+          heading_3: {
+            rich_text: [{ type: "text", text: { content: "Description" } }]
+          }
+        },
+        {
+          object: "block",
+          type: "paragraph",
+          paragraph: {
+            rich_text: [{ type: "text", text: { content: ticket.description } }]
+          }
+        },
+        // Only add attachments section if there are attachments
+        ...(attachmentsText ? [
+          {
+            object: "block",
+            type: "heading_3",
+            heading_3: {
+              rich_text: [{ type: "text", text: { content: "Attachments" } }]
+            }
+          },
+          {
+            object: "block",
+            type: "paragraph",
+            paragraph: {
+              rich_text: [{ type: "text", text: { content: attachmentsText } }]
+            }
+          }
+        ] : [])
+      ]
     });
     
     return response;
