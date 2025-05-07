@@ -1,5 +1,6 @@
 import { Client } from "@notionhq/client";
 import { notion, NOTION_PAGE_ID, findDatabaseByTitle } from "./notion";
+import { validateDatabaseSchema, printValidationResult } from "./notion-validation";
 import * as fs from "fs";
 
 // Load configuration if available
@@ -30,7 +31,7 @@ if (process.env.NOTION_CONFIG_PATH) {
 }
 
 /**
- * Get the Support Tickets database ID
+ * Get the Support Tickets database ID and validate its schema
  */
 export async function getSupportTicketsDatabase() {
   try {
@@ -38,16 +39,36 @@ export async function getSupportTicketsDatabase() {
     
     // First, try to use the database ID from configuration
     if (databaseConfig.databases.supportTickets) {
-      const configuredDatabaseId = databaseConfig.databases.supportTickets;
+      const configuredDatabaseId = databaseConfig.databases.supportTickets as string;
       try {
         // Check if we can access this database
         console.log(`Attempting to use configured database ID: ${configuredDatabaseId}`);
         await notion.databases.retrieve({
           database_id: configuredDatabaseId
         });
+        
+        // Validate the database schema
+        console.log("Validating Support Tickets database schema...");
+        const validationResult = await validateDatabaseSchema(
+          notion, 
+          configuredDatabaseId, 
+          "supportTickets"
+        );
+        
+        if (validationResult.isValid) {
+          console.log("✅ Support Tickets database schema is valid");
+        } else {
+          console.warn("⚠️ Support Tickets database schema has issues:");
+          printValidationResult(validationResult, "supportTickets");
+          
+          // Still return the database ID even if there are schema issues
+          // The app will try to work with what's available
+          console.log("Continuing with the existing database despite schema issues.");
+        }
+        
         console.log(`Successfully connected to Support Tickets database: ${configuredDatabaseId}`);
         return configuredDatabaseId;
-      } catch (configError) {
+      } catch (configError: any) {
         console.error(`Error accessing configured database ID: ${configError.message}`);
         console.log("Falling back to searching for database by title...");
       }
@@ -62,6 +83,23 @@ export async function getSupportTicketsDatabase() {
       
       if (ticketsDb) {
         console.log(`Found existing Support Tickets database with ID: ${ticketsDb.id}`);
+        
+        // Validate the database schema
+        console.log("Validating Support Tickets database schema...");
+        const validationResult = await validateDatabaseSchema(
+          notion, 
+          ticketsDb.id, 
+          "supportTickets"
+        );
+        
+        if (validationResult.isValid) {
+          console.log("✅ Support Tickets database schema is valid");
+        } else {
+          console.warn("⚠️ Support Tickets database schema has issues:");
+          printValidationResult(validationResult, "supportTickets");
+          console.log("Continuing with the existing database despite schema issues.");
+        }
+        
         return ticketsDb.id;
       } else {
         console.log("No Support Tickets database found by title");
@@ -103,6 +141,26 @@ export async function getSupportTicketsDatabase() {
           } catch (error) {
             console.error("Error updating configuration file:", error);
           }
+        }
+        
+        // Validate the database schema
+        console.log("Validating Support Tickets database schema...");
+        try {
+          const validationResult = await validateDatabaseSchema(
+            notion, 
+            firstDb.id, 
+            "supportTickets"
+          );
+          
+          if (validationResult.isValid) {
+            console.log("✅ Support Tickets database schema is valid");
+          } else {
+            console.warn("⚠️ Support Tickets database schema has issues:");
+            printValidationResult(validationResult, "supportTickets");
+            console.log("Continuing with the existing database despite schema issues.");
+          }
+        } catch (validationError) {
+          console.error("Error validating database schema:", validationError);
         }
         
         return firstDb.id;
@@ -184,65 +242,127 @@ export async function addTicket(ticket: any) {
     // Log the database ID we're using
     console.log(`Adding ticket to Notion database with ID: ${databaseId}`);
     
-    // Create the page properties - matched to the exact schema of the database
-    // First, retrieve the database to get the actual schema
+    // Validate schema before creating ticket
+    try {
+      console.log("Validating database schema before creating ticket...");
+      const validationResult = await validateDatabaseSchema(
+        notion, 
+        databaseId, 
+        "supportTickets"
+      );
+      
+      if (!validationResult.isValid) {
+        console.warn("⚠️ Support Tickets database schema has issues:");
+        printValidationResult(validationResult, "supportTickets");
+        
+        // Continue with available properties, but log a warning
+        console.log("Will attempt to create ticket with available properties.");
+        
+        // Check for critical missing properties
+        const criticalProps = ["full_name", "email"];
+        const missingCritical = criticalProps.filter(prop => 
+          validationResult.properties.missing.includes(prop)
+        );
+        
+        if (missingCritical.length > 0) {
+          console.error(`Critical properties missing: ${missingCritical.join(", ")}`);
+          console.error("Cannot create ticket without these properties.");
+          throw new Error(`Database schema missing critical properties: ${missingCritical.join(", ")}`);
+        }
+      } else {
+        console.log("✅ Support Tickets database schema is valid");
+      }
+    } catch (validationError: any) {
+      console.error("Error validating database schema:", validationError.message);
+      // Continue despite validation error, we'll try our best with the ticket creation
+    }
+    
+    // Retrieve the database to get the actual schema
+    let dbSchema;
+    let availableProperties = [];
+    
     try {
       console.log("Retrieving database schema before creating page...");
-      const dbSchema = await notion.databases.retrieve({
+      dbSchema = await notion.databases.retrieve({
         database_id: databaseId
       });
       
       // Log the available properties for debugging
-      console.log("Available properties in database:", Object.keys(dbSchema.properties));
+      availableProperties = Object.keys(dbSchema.properties);
+      console.log("Available properties in database:", availableProperties.join(", "));
     } catch (error) {
       console.error("Error retrieving database schema:", error);
+      // Continue with default properties even if we couldn't retrieve the schema
     }
     
     // Create properties based on the schema we defined when creating the database
-    const properties: any = {
-      // The title property must use the correct name (likely 'full_name')
-      full_name: {
-        title: [
-          {
-            text: {
-              content: ticket.name
-            }
-          }
-        ]
+    const properties: any = {};
+    
+    // The title property must use the correct name (usually 'full_name' or 'name' or 'title')
+    // Detect the title property from the schema
+    let titlePropertyName = "full_name"; // Default
+    
+    if (dbSchema && dbSchema.properties) {
+      // Look for a title property
+      for (const [propName, propDetails] of Object.entries(dbSchema.properties)) {
+        if ((propDetails as any).type === "title") {
+          titlePropertyName = propName;
+          console.log(`Found title property: ${titlePropertyName}`);
+          break;
+        }
       }
-    };
+    }
     
-    // Add email if it exists in the schema
-    properties.email = {
-      email: ticket.email
-    };
-    
-    // Add description as rich text if it exists in the schema
-    properties.description = {
-      rich_text: [
+    // Set the title property
+    properties[titlePropertyName] = {
+      title: [
         {
           text: {
-            content: ticket.description.substring(0, 2000) // Using full available space
+            content: ticket.name
           }
         }
       ]
     };
     
+    // Add email if it exists in the schema
+    if (!availableProperties.length || availableProperties.includes("email")) {
+      properties.email = {
+        email: ticket.email
+      };
+    }
+    
+    // Add description as rich text if it exists in the schema
+    if (!availableProperties.length || availableProperties.includes("description")) {
+      properties.description = {
+        rich_text: [
+          {
+            text: {
+              content: ticket.description.substring(0, 2000) // Using full available space
+            }
+          }
+        ]
+      };
+    }
+    
     // Add status field if it exists in the schema
-    properties.status = {
-      select: {
-        name: ticket.status || 'new'
-      }
-    };
+    if (!availableProperties.length || availableProperties.includes("status")) {
+      properties.status = {
+        select: {
+          name: ticket.status || 'new'
+        }
+      };
+    }
     
     // Add submission_date field with the current date (matching the actual database schema)
-    properties.submission_date = {
-      date: {
-        start: ticket.createdAt ? new Date(ticket.createdAt).toISOString() : new Date().toISOString()
-      }
-    };
+    if (!availableProperties.length || availableProperties.includes("submission_date")) {
+      properties.submission_date = {
+        date: {
+          start: ticket.createdAt ? new Date(ticket.createdAt).toISOString() : new Date().toISOString()
+        }
+      };
+    }
     
-    // Create array of child blocks - omitting Subject and Category as requested
+    // Create array of child blocks with content details
     const children = [
       {
         object: "block",
@@ -282,7 +402,7 @@ export async function addTicket(ticket: any) {
     ];
     
     // Prepare the full page data
-    const pageData = {
+    const pageData: any = {
       parent: {
         database_id: databaseId
       },
@@ -298,8 +418,8 @@ export async function addTicket(ticket: any) {
     
     // Return the transformed ticket for consistent API responses
     return transformTicketFromNotion(response);
-  } catch (error) {
-    console.error("Error adding ticket to Notion:", error);
+  } catch (error: any) {
+    console.error("Error adding ticket to Notion:", error.message);
     throw error;
   }
 }

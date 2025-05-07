@@ -41,7 +41,11 @@ import { exec } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
-// Function to check if Notion databases exist
+// Import the Notion validation service
+import { notion } from './services/notion';
+import { validateDatabaseSchema, printValidationResult } from './services/notion-validation';
+
+// Function to check if Notion databases exist and validate their schemas
 async function checkExistingNotionDatabases() {
   // Only run if Notion environment variables are set
   if (process.env.NOTION_INTEGRATION_SECRET && process.env.NOTION_PAGE_URL) {
@@ -71,7 +75,32 @@ async function checkExistingNotionDatabases() {
       // Read the config file to check for database IDs
       try {
         const configData = JSON.parse(fs.readFileSync(configFile, 'utf8'));
-        console.log('Loaded config file with databases:', Object.keys(configData.databases || {}).join(', '));
+        const databaseKeys = Object.keys(configData.databases || {});
+        console.log('Loaded config file with databases:', databaseKeys.join(', '));
+        
+        // Validate schemas if we have access to database IDs
+        if (databaseKeys.length > 0 && configData.databases) {
+          console.log('Validating database schemas on startup...');
+          
+          try {
+            // Validate each database that we have an ID for
+            for (const dbType of databaseKeys) {
+              const dbId = configData.databases[dbType];
+              if (dbId) {
+                try {
+                  console.log(`Validating ${dbType} database schema...`);
+                  const validationResult = await validateDatabaseSchema(notion, dbId, dbType);
+                  printValidationResult(validationResult, dbType);
+                } catch (validationError) {
+                  console.error(`Error validating ${dbType} database:`, validationError);
+                }
+              }
+            }
+            console.log('Schema validation complete');
+          } catch (error) {
+            console.error('Error during schema validation:', error);
+          }
+        }
       } catch (error) {
         console.error('Error parsing notion-config.json:', error);
       }
