@@ -158,8 +158,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'All fields are required' });
       }
       
-      // Set default values for subject if not provided
-      const subject = req.body.subject || 'Support Request';
+      // Use default value for subject
+      const subject = 'Support Request';
       
       // Verify Notion integration is configured
       if (!process.env.NOTION_INTEGRATION_SECRET || !NOTION_PAGE_ID) {

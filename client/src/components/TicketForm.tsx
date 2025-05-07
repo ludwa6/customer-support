@@ -22,7 +22,6 @@ import { X } from "lucide-react";
 const ticketFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
-  subject: z.string().min(5, "Subject must be at least 5 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
 });
 
@@ -41,7 +40,6 @@ const TicketForm: React.FC<TicketFormProps> = ({ isOpen, onClose }) => {
     defaultValues: {
       name: "",
       email: "",
-      subject: "",
       description: "",
     },
   });
@@ -117,20 +115,6 @@ const TicketForm: React.FC<TicketFormProps> = ({ isOpen, onClose }) => {
                     <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input type="email" placeholder="your.email@example.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="subject"
-                render={({ field }) => (
-                  <FormItem className="sm:col-span-2">
-                    <FormLabel>Subject</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Brief description of your issue" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
