@@ -1,6 +1,9 @@
 import { Client } from "@notionhq/client";
-import { notion, NOTION_PAGE_ID, findDatabaseByTitle, createDatabaseIfNotExists } from "./notion";
+import { notion, NOTION_PAGE_ID, findDatabaseByTitle } from "./notion";
 import * as fs from "fs";
+
+// HARDCODED DATABASE ID - Always use this
+const HARDCODED_SUPPORT_TICKETS_DB_ID = "1ebc922b-6d5b-81f3-8c6e-c02036587a9e";
 
 // Load configuration if available
 let databaseConfig = {
@@ -8,7 +11,7 @@ let databaseConfig = {
     categories: null,
     articles: null,
     faqs: null,
-    supportTickets: null
+    supportTickets: HARDCODED_SUPPORT_TICKETS_DB_ID // Always set this value
   }
 };
 
@@ -70,52 +73,29 @@ export async function getSupportTicketsDatabase() {
       console.error("Error searching for Support Tickets database by title:", e);
     }
     
-    // If database doesn't exist, create it
-    if (NOTION_PAGE_ID) {
-      console.log(`Creating new Support Tickets database in page: ${NOTION_PAGE_ID}`);
-      
-      const newDb = await createDatabaseIfNotExists("Support Tickets", {
-        full_name: {
-          title: {}
-        },
-        email: {
-          email: {}
-        },
-        subject: {
-          rich_text: {}
-        },
-        category: {
-          select: {
-            options: [
-              { name: "General", color: "gray" },
-              { name: "Account", color: "blue" },
-              { name: "Billing", color: "green" },
-              { name: "Technical", color: "red" },
-              { name: "Feature Request", color: "purple" },
-              { name: "Other", color: "orange" }
-            ]
-          }
-        },
-        description: {
-          rich_text: {}
-        },
-        status: {
-          select: {
-            options: [
-              { name: "new", color: "blue" },
-              { name: "in-progress", color: "yellow" },
-              { name: "resolved", color: "green" },
-              { name: "closed", color: "gray" }
-            ]
-          }
-        },
-        created_at: {
-          date: {}
-        }
-      });
-      
-      console.log(`Created new Support Tickets database with ID: ${newDb.id}`);
-      return newDb.id;
+    // NEVER create a new database
+    console.error("ERROR: Could not find the Support Tickets database");
+    console.error("Please ensure a database named 'Support Tickets' exists in your Notion page");
+    console.error("Database ID: 1ebc922b-6d5b-81f3-8c6e-c02036587a9e");
+    
+    // Add this to the configuration file if it's missing
+    if (process.env.NOTION_CONFIG_PATH) {
+      try {
+        const configData = fs.readFileSync(process.env.NOTION_CONFIG_PATH, 'utf8');
+        const config = JSON.parse(configData);
+        
+        // Force the correct database ID
+        config.databases = config.databases || {};
+        config.databases.supportTickets = "1ebc922b-6d5b-81f3-8c6e-c02036587a9e";
+        
+        fs.writeFileSync(process.env.NOTION_CONFIG_PATH, JSON.stringify(config, null, 2));
+        console.log("Updated configuration file with hardcoded Support Tickets database ID");
+        
+        // Return the hardcoded ID
+        return "1ebc922b-6d5b-81f3-8c6e-c02036587a9e";
+      } catch (error) {
+        console.error("Error updating configuration file:", error);
+      }
     }
     
     throw new Error("Could not find or create Support Tickets database");
