@@ -384,12 +384,26 @@ export async function getArticleById(articleId: string) {
  */
 export async function getFAQs(categoryId?: string) {
   try {
-    // Look for a FAQs database by various possible names
-    let faqsDb = await findDatabaseByTitle("FAQs");
+    // We'll search for any database that has FAQ in its name
+    let faqsDb = null;
     
-    // If not found with "FAQs", try "SerenityFlow FAQ"
-    if (!faqsDb) {
-      faqsDb = await findDatabaseByTitle("SerenityFlow FAQ");
+    // Get all databases and look for any with "FAQ" in the name
+    try {
+      const databases = await getNotionDatabases();
+      
+      for (const db of databases) {
+        // Check if database title contains "FAQ" (case insensitive)
+        if (db.title && Array.isArray(db.title) && db.title.length > 0) {
+          const dbTitle = db.title[0]?.plain_text || "";
+          if (dbTitle.toLowerCase().includes("faq")) {
+            console.log(`Found database with FAQ in name: ${dbTitle}`);
+            faqsDb = db;
+            break;
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error searching for FAQ databases:", error);
     }
     
     // Determine which database to use
