@@ -1,25 +1,54 @@
 import { Client } from "@notionhq/client";
 import { notion, NOTION_PAGE_ID, findDatabaseByTitle, createDatabaseIfNotExists } from "./notion";
+import * as fs from "fs";
+
+// Load configuration if available
+let databaseConfig = {
+  databases: {
+    categories: null,
+    articles: null,
+    faqs: null,
+    supportTickets: null
+  }
+};
+
+// Check if a configuration file path is specified
+if (process.env.NOTION_CONFIG_PATH) {
+  try {
+    const configPath = process.env.NOTION_CONFIG_PATH;
+    console.log(`Loading Notion database configuration from ${configPath}`);
+    
+    // Load the configuration file
+    const configData = fs.readFileSync(configPath, 'utf8');
+    databaseConfig = JSON.parse(configData);
+    
+    console.log('Loaded tickets database configuration:');
+    console.log(`- Support Tickets database: ${databaseConfig.databases.supportTickets}`);
+  } catch (error) {
+    console.error(`Error loading Notion configuration file: ${error.message}`);
+  }
+}
 
 /**
  * Get the Support Tickets database ID
  */
 export async function getSupportTicketsDatabase() {
   try {
-    // First, try to use the specific database ID from the URL
-    const specificDatabaseId = "1ebc922b6d5b8006b3d0c0b013b4f2fb";
-    
-    try {
-      // Check if we can access this database directly
-      console.log(`Attempting to use specific database ID: ${specificDatabaseId}`);
-      await notion.databases.retrieve({
-        database_id: specificDatabaseId
-      });
-      console.log(`Successfully connected to database: ${specificDatabaseId}`);
-      return specificDatabaseId;
-    } catch (specificError) {
-      console.error(`Error accessing specific database ID: ${specificError.message}`);
-      console.log("Falling back to searching for database by title...");
+    // First, try to use the database ID from configuration
+    if (databaseConfig.databases.supportTickets) {
+      const configuredDatabaseId = databaseConfig.databases.supportTickets;
+      try {
+        // Check if we can access this database
+        console.log(`Attempting to use configured database ID: ${configuredDatabaseId}`);
+        await notion.databases.retrieve({
+          database_id: configuredDatabaseId
+        });
+        console.log(`Successfully connected to database: ${configuredDatabaseId}`);
+        return configuredDatabaseId;
+      } catch (configError) {
+        console.error(`Error accessing configured database ID: ${configError.message}`);
+        console.log("Falling back to searching for database by title...");
+      }
     }
     
     // If that fails, continue with the original logic

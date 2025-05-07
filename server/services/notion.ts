@@ -1,5 +1,33 @@
 import { Client } from "@notionhq/client";
+import * as fs from "fs";
 
+// Load database configuration from file if specified
+let databaseConfig = {
+  databases: {
+    categories: null,
+    articles: null,
+    faqs: null
+  }
+};
+
+// Check if a configuration file path is specified
+if (process.env.NOTION_CONFIG_PATH) {
+  try {
+    const configPath = process.env.NOTION_CONFIG_PATH;
+    console.log(`Loading Notion database configuration from ${configPath}`);
+    
+    // Load the configuration file
+    const configData = fs.readFileSync(configPath, 'utf8');
+    databaseConfig = JSON.parse(configData);
+    
+    console.log('Successfully loaded database configuration:');
+    console.log(`- Categories database: ${databaseConfig.databases.categories}`);
+    console.log(`- Articles database: ${databaseConfig.databases.articles}`);
+    console.log(`- FAQs database: ${databaseConfig.databases.faqs}`);
+  } catch (error) {
+    console.error(`Error loading Notion configuration file: ${error.message}`);
+  }
+}
 // Initialize Notion client
 export const notion = new Client({
   auth: process.env.NOTION_INTEGRATION_SECRET
@@ -147,7 +175,7 @@ export async function queryDatabase(databaseId: string, filter = {}, sorts = [])
 export async function getCategories() {
   try {
     // Using the direct DATABASE_ID since we know it now
-    const DATABASE_ID = "1ebc922b6d5b80729c9dd0d4f7ccf567";
+    const DATABASE_ID = databaseConfig.databases.faqs || "1ebc922b6d5b80729c9dd0d4f7ccf567";
     
     // Retrieve the database to get category options
     const dbInfo = await notion.databases.retrieve({
@@ -182,7 +210,7 @@ export async function getArticles(categoryId?: string, isPopular?: boolean) {
     
     // If Articles database doesn't exist, use the FAQ database as a fallback
     // This ensures we only show authentic data from Notion
-    const DATABASE_ID = articlesDb ? articlesDb.id : "1ebc922b6d5b80729c9dd0d4f7ccf567";
+    const DATABASE_ID = databaseConfig.databases.articles || (articlesDb ? articlesDb.id : "1ebc922b6d5b80729c9dd0d4f7ccf567");
     
     // Use properly formatted query options
     const queryOptions: any = {
@@ -291,7 +319,7 @@ export async function getArticleById(articleId: string) {
 export async function getFAQs(categoryId?: string) {
   try {
     // Using the direct DATABASE_ID since we know it now
-    const DATABASE_ID = "1ebc922b6d5b80729c9dd0d4f7ccf567";
+    const DATABASE_ID = databaseConfig.databases.faqs || "1ebc922b6d5b80729c9dd0d4f7ccf567";
     
     // Use properly formatted filter object or no filter
     const queryOptions: any = {

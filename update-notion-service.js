@@ -4,8 +4,8 @@
  * Script to update the notion service to use existing databases
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 const notionServicePath = 'server/services/notion.ts';
 
