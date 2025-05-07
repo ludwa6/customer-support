@@ -321,7 +321,8 @@ export async function getCategories() {
 }
 
 /**
- * Get all articles or filter by category
+ * Get all articles or filter by category (DEPRECATED - Use getFAQs instead)
+ * This function is kept for backward compatibility and redirects to FAQs
  */
 export async function getArticles(categoryId?: string, isPopular?: boolean) {
   try {

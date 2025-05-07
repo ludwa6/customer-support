@@ -1,8 +1,6 @@
 // Import Notion service functions
 import { 
   getCategories as notionGetCategories, 
-  getArticles as notionGetArticles, 
-  getArticleById as notionGetArticleById, 
   getFAQs as notionGetFAQs 
 } from "./services/notion";
 
@@ -56,17 +54,47 @@ export const storage = {
   },
   
   /**
-   * ARTICLE OPERATIONS
+   * ARTICLE OPERATIONS (Deprecated - Redirects to FAQs)
    */
   
   // Get all articles from Notion with optional filtering
+  // Now transforming FAQs into Article format for backward compatibility
   async getArticles(categoryId?: string, isPopular?: boolean) {
-    return notionGetArticles(categoryId, isPopular);
+    console.log('Warning: getArticles is deprecated. Using getFAQs instead.');
+    const faqs = await this.getFAQs(categoryId);
+    
+    // Transform FAQs to match Article format
+    return faqs.map(faq => ({
+      id: faq.id,
+      title: faq.question,
+      content: faq.answer,
+      categoryId: faq.categoryId,
+      categoryName: faq.categoryName,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isPopular: isPopular || false
+    }));
   },
   
   // Get article by ID from Notion
+  // Now returning a transformed FAQ for backward compatibility
   async getArticleById(id: string) {
-    return notionGetArticleById(id);
+    console.log('Warning: getArticleById is deprecated. Using getFAQById instead.');
+    const faq = await this.getFAQById(id);
+    
+    if (!faq) return null;
+    
+    // Transform FAQ to match Article format
+    return {
+      id: faq.id,
+      title: faq.question,
+      content: faq.answer,
+      categoryId: faq.categoryId,
+      categoryName: faq.categoryName,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isPopular: false
+    };
   },
   
   /**
