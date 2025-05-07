@@ -174,48 +174,101 @@ export async function queryDatabase(databaseId: string, filter = {}, sorts = [])
  */
 export async function getCategories() {
   try {
-    // First try to find the FAQs database by name
-    const faqsDb = await findDatabaseByTitle("FAQs");
-    const categoriesDb = await findDatabaseByTitle("Categories");
-    
-    // Determine which database to use for categories
-    let DATABASE_ID;
-    
-    if (categoriesDb) {
-      console.log("Using Categories database for categories");
-      DATABASE_ID = categoriesDb.id;
-    } else if (faqsDb) {
-      console.log("Using FAQs database for categories");
-      DATABASE_ID = faqsDb.id;
-    } else if (databaseConfig.databases.faqs) {
-      // Try using the configuration if available
-      DATABASE_ID = databaseConfig.databases.faqs;
-    } else {
-      // Fallback to hardcoded ID as absolute last resort
-      console.log("No categories database found, using fallback");
-      DATABASE_ID = "1ebc922b6d5b80729c9dd0d4f7ccf567";
+    // Try multiple sources for the categories database ID
+    // 1. First check config file
+    let DATABASE_ID = null;
+    if (databaseConfig.databases.categories) {
+      console.log("Using Categories database from config");
+      DATABASE_ID = databaseConfig.databases.categories;
+    } 
+    // 2. Try to find by name
+    else {
+      const categoriesDb = await findDatabaseByTitle("Categories");
+      if (categoriesDb) {
+        console.log("Using Categories database found by name");
+        DATABASE_ID = categoriesDb.id;
+      }
     }
     
-    // Retrieve the database to get category options
-    const dbInfo = await notion.databases.retrieve({
-      database_id: DATABASE_ID
-    });
+    // 3. Try FAQs database if no categories db found
+    if (!DATABASE_ID) {
+      if (databaseConfig.databases.faqs) {
+        console.log("Using FAQs database from config");
+        DATABASE_ID = databaseConfig.databases.faqs;
+      } else {
+        const faqsDb = await findDatabaseByTitle("FAQs");
+        if (faqsDb) {
+          console.log("Using FAQs database for categories");
+          DATABASE_ID = faqsDb.id;
+        }
+      }
+    }
 
-    // Extract category options from the database properties
-    const categoryProperty = dbInfo.properties.category;
-    if (categoryProperty && categoryProperty.type === 'select' && categoryProperty.select.options) {
-      return categoryProperty.select.options.map(option => ({
-        id: option.id,
-        name: option.name,
-        description: `${option.name} category for SerenityFlow`,
-        icon: option.color || "default",
-      }));
+    // 4. Use any available database as a last resort (Support Tickets has categories)
+    if (!DATABASE_ID && databaseConfig.databases.supportTickets) {
+      console.log("Using Support Tickets database for categories");
+      DATABASE_ID = databaseConfig.databases.supportTickets;
     }
     
-    return [];
+    // If we found a database ID, use it
+    if (DATABASE_ID) {
+      // Retrieve the database to get category options
+      const dbInfo = await notion.databases.retrieve({
+        database_id: DATABASE_ID
+      });
+
+      // Extract category options from the database properties
+      const properties = dbInfo.properties;
+      
+      // Look for a property that might be categories
+      let categoryOptions = [];
+      
+      // First look for a "category" property
+      if (properties.category && properties.category.type === 'select' && properties.category.select.options) {
+        categoryOptions = properties.category.select.options;
+      } 
+      // Then look for "Category" property
+      else if (properties.Category && properties.Category.type === 'select' && properties.Category.select.options) {
+        categoryOptions = properties.Category.select.options;
+      }
+      // Look for any select-type property as fallback
+      else {
+        for (const [key, prop] of Object.entries(properties)) {
+          if (prop.type === 'select' && prop.select && prop.select.options && prop.select.options.length > 0) {
+            categoryOptions = prop.select.options;
+            console.log(`Using ${key} property for categories`);
+            break;
+          }
+        }
+      }
+      
+      if (categoryOptions.length > 0) {
+        return categoryOptions.map(option => ({
+          id: option.id,
+          name: option.name,
+          description: `${option.name} category for SerenityFlow`,
+          icon: option.color || "default",
+        }));
+      }
+    }
+
+    // Last resort - return default categories if nothing can be found
+    console.log("No categories database found, using fallback categories");
+    return [
+      { id: "XODu", name: "Getting Started", description: "Getting Started category for SerenityFlow", icon: "blue" },
+      { id: "QbD8", name: "Account Settings", description: "Account Settings category for SerenityFlow", icon: "green" },
+      { id: "LcVm", name: "Workflows & Automations", description: "Workflows & Automations category for SerenityFlow", icon: "purple" },
+      { id: "PqXj", name: "Integrations", description: "Integrations category for SerenityFlow", icon: "orange" }
+    ];
   } catch (error) {
     console.error("Error fetching categories from Notion:", error);
-    return []; // Return empty array instead of throwing to prevent app crashes
+    // Return default categories as fallback
+    return [
+      { id: "XODu", name: "Getting Started", description: "Getting Started category for SerenityFlow", icon: "blue" },
+      { id: "QbD8", name: "Account Settings", description: "Account Settings category for SerenityFlow", icon: "green" },
+      { id: "LcVm", name: "Workflows & Automations", description: "Workflows & Automations category for SerenityFlow", icon: "purple" },
+      { id: "PqXj", name: "Integrations", description: "Integrations category for SerenityFlow", icon: "orange" }
+    ];
   }
 }
 

@@ -48,12 +48,33 @@ async function checkExistingNotionDatabases() {
     // Check if we've already detected databases
     const flagFile = '.notion-db-exists';
     const configFile = 'notion-config.json';
+    const preventSetupFile = '.prevent-notion-setup';
+    
+    // Create the prevent-setup file if it doesn't exist but we do have a config
+    if (!fs.existsSync(preventSetupFile) && fs.existsSync(configFile)) {
+      fs.writeFileSync(preventSetupFile, 'true');
+      console.log('Created .prevent-notion-setup file to prevent database creation');
+    }
+    
+    // Ensure we create the flag file if we have a config
+    if (!fs.existsSync(flagFile) && fs.existsSync(configFile)) {
+      fs.writeFileSync(flagFile, 'true');
+      console.log('Created .notion-db-exists flag to indicate databases exist');
+    }
     
     // If config exists but NOTION_CONFIG_PATH isn't set, add it to process.env
     if (fs.existsSync(configFile) && !process.env.NOTION_CONFIG_PATH) {
       console.log('Found notion-config.json but NOTION_CONFIG_PATH is not set');
       console.log('Setting NOTION_CONFIG_PATH to ./notion-config.json');
       process.env.NOTION_CONFIG_PATH = './notion-config.json';
+      
+      // Read the config file to check for database IDs
+      try {
+        const configData = JSON.parse(fs.readFileSync(configFile, 'utf8'));
+        console.log('Loaded config file with databases:', Object.keys(configData.databases || {}).join(', '));
+      } catch (error) {
+        console.error('Error parsing notion-config.json:', error);
+      }
     }
     
     if (!fs.existsSync(flagFile)) {
