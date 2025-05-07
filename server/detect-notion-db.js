@@ -7,7 +7,8 @@
  * before automatically creating new ones.
  */
 
-const { Client } = require('@notionhq/client');
+import { Client } from '@notionhq/client';
+import fs from 'fs';
 
 // Access environment variables
 const NOTION_INTEGRATION_SECRET = process.env.NOTION_INTEGRATION_SECRET;
@@ -71,7 +72,7 @@ async function detectDatabases() {
       console.log('node use-existing-db.js');
       
       // Create a flag file to indicate existing databases were found
-      require('fs').writeFileSync('.notion-db-exists', JSON.stringify({ 
+      fs.writeFileSync('.notion-db-exists', JSON.stringify({ 
         timestamp: new Date().toISOString(),
         databaseCount: databases.length 
       }));
