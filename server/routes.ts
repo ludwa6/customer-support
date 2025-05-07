@@ -1,7 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { NOTION_PAGE_ID, getCategories, getArticles, getArticleById, getFAQs } from "./services/notion";
+import { NOTION_PAGE_ID } from "./services/notion";
 import { generateAIResponse, shouldRedirectToSupport } from "./services/openai";
+import { storage } from "./storage";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -60,7 +61,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Categories API
   app.get('/api/categories', async (req, res) => {
     try {
-      const categories = await getCategories();
+      const categories = await storage.getCategories();
       res.json(categories);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -74,7 +75,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const categoryId = req.query.categoryId as string;
       const isPopular = req.query.isPopular === 'true';
       
-      const articles = await getArticles(categoryId, isPopular);
+      const articles = await storage.getArticles(categoryId, isPopular);
       res.json(articles);
     } catch (error) {
       console.error('Error fetching articles:', error);
@@ -87,7 +88,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Get all articles and take the first 5 as popular ones
       // In a real app, you would have a specific flag in Notion for popular articles
-      const allArticles = await getArticles();
+      const allArticles = await storage.getArticles();
       
       // Just get 5 articles from the list
       const popularArticles = allArticles.slice(0, 5);
@@ -103,7 +104,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/articles/:id', async (req, res) => {
     try {
       const articleId = req.params.id;
-      const article = await getArticleById(articleId);
+      const article = await storage.getArticleById(articleId);
       
       if (!article) {
         return res.status(404).json({ message: 'Article not found' });
@@ -120,7 +121,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/faqs', async (req, res) => {
     try {
       const categoryId = req.query.categoryId as string;
-      const faqs = await getFAQs(categoryId);
+      const faqs = await storage.getFAQs(categoryId);
       res.json(faqs);
     } catch (error) {
       console.error('Error fetching FAQs:', error);
@@ -168,9 +169,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Create new ticket directly in Notion
-      const { addTicket } = await import('./services/notion-tickets');
-      const newTicket = await addTicket({
+      // Create new ticket using storage interface
+      const newTicket = await storage.insertTicket({
         name,
         email,
         subject,
@@ -200,8 +200,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const { getTickets } = await import('./services/notion-tickets');
-      const tickets = await getTickets();
+      const tickets = await storage.getTickets();
       res.json(tickets);
     } catch (error) {
       console.error('Error fetching tickets:', error);
@@ -221,8 +220,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const { getTicketById } = await import('./services/notion-tickets');
-      const ticket = await getTicketById(ticketId);
+      const ticket = await storage.getTicketById(ticketId);
       
       if (!ticket) {
         return res.status(404).json({ message: 'Ticket not found' });
@@ -252,8 +250,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const { updateTicketStatus } = await import('./services/notion-tickets');
-      const updatedTicket = await updateTicketStatus(ticketId, status);
+      const updatedTicket = await storage.updateTicketStatus(ticketId, status);
       
       res.json({
         message: 'Ticket status updated successfully',

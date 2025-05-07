@@ -1,119 +1,86 @@
-import { db } from "@db";
-import { tickets, insertTicketSchema, categories, articles, faqs } from "@shared/schema";
-import { eq, and, desc } from "drizzle-orm";
+// Import Notion service functions
+import { 
+  getCategories as notionGetCategories, 
+  getArticles as notionGetArticles, 
+  getArticleById as notionGetArticleById, 
+  getFAQs as notionGetFAQs 
+} from "./services/notion";
 
+import {
+  getTickets as notionGetTickets,
+  getTicketById as notionGetTicketById,
+  addTicket as notionAddTicket,
+  updateTicketStatus as notionUpdateTicketStatus
+} from "./services/notion-tickets";
+
+// This storage interface is now a wrapper around Notion API calls
+// All data is stored in Notion, not in a SQL database
 export const storage = {
   /**
    * TICKET OPERATIONS
    */
   
-  // Get all tickets
+  // Get all tickets directly from Notion
   async getTickets() {
-    return db.query.tickets.findMany({
-      orderBy: desc(tickets.createdAt)
-    });
+    return notionGetTickets();
   },
   
-  // Get ticket by ID
-  async getTicketById(id: number) {
-    return db.query.tickets.findFirst({
-      where: eq(tickets.id, id)
-    });
+  // Get ticket by ID from Notion
+  async getTicketById(id: string) {
+    return notionGetTicketById(id);
   },
   
-  // Insert a new ticket
+  // Insert a new ticket into Notion
   async insertTicket(ticketData: any) {
-    try {
-      const validatedData = insertTicketSchema.parse(ticketData);
-      const [newTicket] = await db.insert(tickets).values(validatedData).returning();
-      return newTicket;
-    } catch (error) {
-      console.error("Error inserting ticket:", error);
-      throw error;
-    }
+    return notionAddTicket(ticketData);
   },
   
-  // Update ticket status
-  async updateTicketStatus(id: number, status: string) {
-    const [updatedTicket] = await db
-      .update(tickets)
-      .set({ status })
-      .where(eq(tickets.id, id))
-      .returning();
-      
-    return updatedTicket;
+  // Update ticket status in Notion
+  async updateTicketStatus(id: string, status: string) {
+    return notionUpdateTicketStatus(id, status);
   },
   
   /**
    * CATEGORY OPERATIONS
    */
   
-  // Get all categories
+  // Get all categories from Notion
   async getCategories() {
-    return db.query.categories.findMany();
+    return notionGetCategories();
   },
   
-  // Get category by ID
-  async getCategoryById(id: number) {
-    return db.query.categories.findFirst({
-      where: eq(categories.id, id)
-    });
+  // Get category by ID from Notion (pass-through function)
+  async getCategoryById(id: string) {
+    const categories = await notionGetCategories();
+    return categories.find(category => category.id === id) || null;
   },
   
   /**
    * ARTICLE OPERATIONS
    */
   
-  // Get all articles
-  async getArticles(categoryId?: number, isPopular?: boolean) {
-    let query = db.query.articles;
-    
-    if (categoryId && isPopular !== undefined) {
-      return query.findMany({
-        where: and(
-          eq(articles.categoryId, categoryId),
-          eq(articles.isPopular, isPopular)
-        )
-      });
-    } else if (categoryId) {
-      return query.findMany({
-        where: eq(articles.categoryId, categoryId)
-      });
-    } else if (isPopular !== undefined) {
-      return query.findMany({
-        where: eq(articles.isPopular, isPopular)
-      });
-    }
-    
-    return query.findMany();
+  // Get all articles from Notion with optional filtering
+  async getArticles(categoryId?: string, isPopular?: boolean) {
+    return notionGetArticles(categoryId, isPopular);
   },
   
-  // Get article by ID
-  async getArticleById(id: number) {
-    return db.query.articles.findFirst({
-      where: eq(articles.id, id)
-    });
+  // Get article by ID from Notion
+  async getArticleById(id: string) {
+    return notionGetArticleById(id);
   },
   
   /**
    * FAQ OPERATIONS
    */
   
-  // Get all FAQs
-  async getFAQs(categoryId?: number) {
-    if (categoryId) {
-      return db.query.faqs.findMany({
-        where: eq(faqs.categoryId, categoryId)
-      });
-    }
-    
-    return db.query.faqs.findMany();
+  // Get all FAQs from Notion with optional category filtering
+  async getFAQs(categoryId?: string) {
+    return notionGetFAQs(categoryId);
   },
   
-  // Get FAQ by ID
-  async getFAQById(id: number) {
-    return db.query.faqs.findFirst({
-      where: eq(faqs.id, id)
-    });
+  // Get FAQ by ID from Notion
+  async getFAQById(id: string) {
+    const faqs = await notionGetFAQs();
+    return faqs.find(faq => faq.id === id) || null;
   }
 };
