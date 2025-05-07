@@ -1,0 +1,227 @@
+I'll explain how we can implement Configuration Validation to make the system more robust. Here's a detailed breakdown:
+
+### 1. Database Schema Validation
+
+First, let's define the expected schema for each database type:
+
+```typescript
+// server/types/notion-schemas.ts
+interface DatabaseSchema {
+  requiredProperties: string[];
+  propertyTypes: {
+    [key: string]: {
+      type: string;
+      required?: boolean;
+      options?: string[]; // For select/multi-select properties
+    };
+  };
+}
+
+const DATABASE_SCHEMAS: { [key: string]: DatabaseSchema } = {
+  faqs: {
+    requiredProperties: ['question', 'answer', 'category'],
+    propertyTypes: {
+      question: { type: 'title', required: true },
+      answer: { type: 'rich_text', required: true },
+      category: { 
+        type: 'select', 
+        required: true,
+        options: ['General', 'Account', 'Technical', 'Billing']
+      }
+    }
+  },
+  supportTickets: {
+    requiredProperties: ['full_name', 'email', 'subject', 'status'],
+    propertyTypes: {
+      full_name: { type: 'title', required: true },
+      email: { type: 'email', required: true },
+      subject: { type: 'rich_text', required: true },
+      status: { 
+        type: 'select', 
+        required: true,
+        options: ['new', 'in-progress', 'resolved', 'closed']
+      }
+    }
+  }
+  // Add other database schemas...
+};
+```
+
+### 2. Validation Function
+
+```typescript
+// server/services/notion-validation.ts
+import { Client } from "@notionhq/client";
+import { DATABASE_SCHEMAS } from '../types/notion-schemas';
+
+export async function validateDatabaseSchema(
+  notion: Client,
+  databaseId: string,
+  databaseType: string
+): Promise<{ isValid: boolean; errors: string[] }> {
+  const schema = DATABASE_SCHEMAS[databaseType];
+  if (!schema) {
+    return {
+      isValid: false,
+      errors: [`No schema defined for database type: ${databaseType}`]
+    };
+  }
+
+  try {
+    // Fetch database info from Notion
+    const database = await notion.databases.retrieve({
+      database_id: databaseId
+    });
+
+    const errors: string[] = [];
+
+    // Check required properties
+    for (const requiredProp of schema.requiredProperties) {
+      if (!database.properties[requiredProp]) {
+        errors.push(`Missing required property: ${requiredProp}`);
+      }
+    }
+
+    // Validate property types and options
+    for (const [propName, propConfig] of Object.entries(schema.propertyTypes)) {
+      const property = database.properties[propName];
+      
+      if (propConfig.required && !property) {
+        errors.push(`Missing required property: ${propName}`);
+        continue;
+      }
+
+      if (property) {
+        // Check property type
+        if (property.type !== propConfig.type) {
+          errors.push(
+            `Property ${propName} has wrong type. Expected ${propConfig.type}, got ${property.type}`
+          );
+        }
+
+        // Check select options if applicable
+        if (propConfig.type === 'select' && propConfig.options) {
+          const selectProperty = property as any;
+          const validOptions = new Set(propConfig.options);
+          
+          selectProperty.select?.options?.forEach((option: any) => {
+            if (!validOptions.has(option.name)) {
+              errors.push(
+                `Invalid option "${option.name}" in select property ${propName}`
+              );
+            }
+          });
+        }
+      }
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors
+    };
+  } catch (error) {
+    return {
+      isValid: false,
+      errors: [`Error validating database: ${error.message}`]
+    };
+  }
+}
+```
+
+### 3. Integration with Setup Process
+
+```typescript
+// server/setup-notion.ts
+import { validateDatabaseSchema } from './services/notion-validation';
+
+async function setupNotionDatabases() {
+  // ... existing setup code ...
+
+  try {
+    // Create databases
+    const categoriesDb = await createDatabaseIfNotExists("Categories", {
+      // ... properties ...
+    });
+    
+    const articlesDb = await createDatabaseIfNotExists("Articles", {
+      // ... properties ...
+    });
+    
+    const faqsDb = await createDatabaseIfNotExists("FAQs", {
+      // ... properties ...
+    });
+
+    // Validate each database
+    const validationResults = await Promise.all([
+      validateDatabaseSchema(notion, categoriesDb.id, 'categories'),
+      validateDatabaseSchema(notion, articlesDb.id, 'articles'),
+      validateDatabaseSchema(notion, faqsDb.id, 'faqs')
+    ]);
+
+    // Check for validation errors
+    const errors = validationResults
+      .filter(result => !result.isValid)
+      .flatMap(result => result.errors);
+
+    if (errors.length > 0) {
+      console.error("❌ Database validation failed:");
+      errors.forEach(error => console.error(`- ${error}`));
+      throw new Error("Database validation failed");
+    }
+
+    console.log("✅ All databases validated successfully!");
+    return { categoriesDb, articlesDb, faqsDb };
+  } catch (error) {
+    console.error("❌ Error setting up Notion databases:", error);
+    throw error;
+  }
+}
+```
+
+### 4. Runtime Validation
+
+```typescript
+// server/services/notion.ts
+export async function getFAQs(categoryId?: string) {
+  try {
+    // Get database ID
+    const databaseId = await getDatabaseId('faqs');
+    
+    // Validate database before use
+    const validation = await validateDatabaseSchema(notion, databaseId, 'faqs');
+    if (!validation.isValid) {
+      console.error("FAQ database validation failed:", validation.errors);
+      throw new Error("Invalid FAQ database schema");
+    }
+
+    // Continue with existing logic...
+    const queryOptions: any = {
+      database_id: databaseId
+    };
+    // ... rest of the function
+  } catch (error) {
+    console.error("Error in getFAQs:", error);
+    throw error;
+  }
+}
+```
+
+### Benefits of This Approach:
+
+1. **Early Detection:**
+   - Catches schema issues during setup
+   - Prevents runtime errors from invalid database structures
+
+2. **Self-Documenting:**
+   - Schema definitions serve as documentation
+   - Makes it clear what properties are required
+
+3. **Maintainable:**
+   - Easy to update schema requirements
+   - Centralized validation logic
+
+4. **User-Friendly:**
+   - Clear error messages
+   - Helps users fix configuration issues
+
+Would you like me to help you implement this validation system in your codebase? We can start with the most critical databases first and gradually add validation for others.
