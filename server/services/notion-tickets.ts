@@ -109,6 +109,11 @@ export async function getTicketById(ticketId: string) {
  */
 export async function addTicket(ticket: any) {
   try {
+    console.log("Adding ticket to Notion:", JSON.stringify(ticket, null, 2));
+    
+    // Debug NOTION_PAGE_ID
+    console.log("NOTION_PAGE_ID:", NOTION_PAGE_ID);
+    
     // Get the database ID
     const databaseId = await getSupportTicketsDatabase();
     
@@ -119,8 +124,7 @@ export async function addTicket(ticket: any) {
     // Log the database ID we're using
     console.log(`Adding ticket to Notion database with ID: ${databaseId}`);
     
-    // Create the page in Notion
-    const response = await notion.pages.create({
+    const pageData = {
       parent: {
         database_id: databaseId
       },
@@ -223,7 +227,14 @@ export async function addTicket(ticket: any) {
           }
         }
       ]
-    });
+    };
+    
+    console.log("Page data to be sent to Notion:", JSON.stringify(pageData, null, 2));
+    
+    // Create the page in Notion
+    const response = await notion.pages.create(pageData);
+    
+    console.log("Response from Notion:", response.id);
     
     // Return the transformed ticket for consistent API responses
     return transformTicketFromNotion(response);
