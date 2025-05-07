@@ -47,6 +47,14 @@ async function checkExistingNotionDatabases() {
   if (process.env.NOTION_INTEGRATION_SECRET && process.env.NOTION_PAGE_URL) {
     // Check if we've already detected databases
     const flagFile = '.notion-db-exists';
+    const configFile = 'notion-config.json';
+    
+    // If config exists but NOTION_CONFIG_PATH isn't set, add it to process.env
+    if (fs.existsSync(configFile) && !process.env.NOTION_CONFIG_PATH) {
+      console.log('Found notion-config.json but NOTION_CONFIG_PATH is not set');
+      console.log('Setting NOTION_CONFIG_PATH to ./notion-config.json');
+      process.env.NOTION_CONFIG_PATH = './notion-config.json';
+    }
     
     if (!fs.existsSync(flagFile)) {
       console.log('Checking for existing Notion databases...');
@@ -58,10 +66,22 @@ async function checkExistingNotionDatabases() {
             console.error('Error checking Notion databases:', error);
           } else {
             console.log(stdout);
+            
+            // If databases were found and use-existing-db hasn't been run yet
+            if (fs.existsSync(flagFile) && !fs.existsSync(configFile)) {
+              console.log('Databases detected but not configured. For automatic configuration:');
+              console.log('Run: node use-existing-db.js');
+            }
           }
           resolve();
         });
       });
+    } else {
+      // If flag exists but config doesn't, remind user to run use-existing-db.js
+      if (!fs.existsSync(configFile) && !process.env.NOTION_CONFIG_PATH) {
+        console.log('Existing databases detected but not configured');
+        console.log('To use them, run: node use-existing-db.js');
+      }
     }
   }
 }
