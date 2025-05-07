@@ -7,9 +7,12 @@
  * when someone remixes the project.
  */
 
-const { exec } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+import { exec as execCallback } from 'child_process';
+import * as fs from 'fs';
+import * as path from 'path';
+import { promisify } from 'util';
+
+const exec = promisify(execCallback);
 
 // ANSI color codes for output formatting
 const colors = {
@@ -228,19 +231,17 @@ async function runAutoSetup() {
 }
 
 // Helper to run a command and return a promise
-function runCommand(command) {
-  return new Promise((resolve, reject) => {
-    const proc = exec(command, (error, stdout, stderr) => {
-      if (error) {
-        reject(error);
-        return;
-      }
-      resolve(stdout);
-    });
-    
-    proc.stdout.pipe(process.stdout);
-    proc.stderr.pipe(process.stderr);
-  });
+async function runCommand(command) {
+  try {
+    const { stdout, stderr } = await exec(command);
+    console.log(stdout);
+    if (stderr) console.error(stderr);
+    return stdout;
+  } catch (error) {
+    console.error(`Error executing command: ${command}`);
+    console.error(error);
+    throw error;
+  }
 }
 
 // Run the auto setup

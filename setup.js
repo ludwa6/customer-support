@@ -7,10 +7,13 @@
  * integration and connecting it to the application.
  */
 
-const readline = require('readline');
-const { exec } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+import * as readline from 'readline';
+import { exec as execCallback } from 'child_process';
+import * as fs from 'fs';
+import * as path from 'path';
+import { promisify } from 'util';
+
+const exec = promisify(execCallback);
 
 // Create readline interface
 const rl = readline.createInterface({
@@ -241,7 +244,7 @@ function confirmSetup(secret, pageUrl) {
 }
 
 // Step 7: Run Setup Script
-function runSetupScript(secret, pageUrl) {
+async function runSetupScript(secret, pageUrl) {
   printInfo('\nRunning setup script...');
   
   // Run the setup script with environment variables
@@ -251,23 +254,23 @@ function runSetupScript(secret, pageUrl) {
     NOTION_PAGE_URL: pageUrl 
   };
   
-  const setupProcess = exec('tsx server/setup-notion.ts', { env }, (error, stdout, stderr) => {
-    if (error) {
-      printError('Error running setup script:');
+  try {
+    const { stdout, stderr } = await exec('tsx server/setup-notion.ts', { env });
+    
+    if (stderr) {
       console.error(stderr);
-      printInfo('\nYou can try running it manually later with:');
-      printInfo('node server/setup-notion.ts');
-      finishSetup();
-      return;
     }
     
     console.log(stdout);
     printSuccess('Notion databases initialized successfully!');
+  } catch (error) {
+    printError('Error running setup script:');
+    console.error(error.message);
+    printInfo('\nYou can try running it manually later with:');
+    printInfo('node server/setup-notion.ts');
+  } finally {
     finishSetup();
-  });
-  
-  setupProcess.stdout.pipe(process.stdout);
-  setupProcess.stderr.pipe(process.stderr);
+  }
 }
 
 // Finish setup
