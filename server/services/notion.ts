@@ -1,5 +1,6 @@
 import { Client } from "@notionhq/client";
 import * as fs from "fs";
+import { extractPageIdFromUrl } from "./utils";
 
 // Load database configuration from file if specified
 let databaseConfig = {
@@ -49,19 +50,23 @@ export const notion = new Client({
 });
 
 // Get the Notion page ID from the environment variable
-export const NOTION_PAGE_ID = process.env.NOTION_PAGE_URL 
-  ? extractPageIdFromUrl(process.env.NOTION_PAGE_URL)
-  : null;
+export let NOTION_PAGE_ID: string | null = null;
 
-/**
- * Helper function to extract the page ID from a Notion URL
- */
-export function extractPageIdFromUrl(pageUrl: string): string {
-  const match = pageUrl.match(/([a-f0-9]{32})(?:[?#]|$)/i);
-  if (match && match[1]) {
-    return match[1];
+try {
+  if (process.env.NOTION_PAGE_URL) {
+    console.log("Extracting page ID from NOTION_PAGE_URL:", process.env.NOTION_PAGE_URL);
+    NOTION_PAGE_ID = extractPageIdFromUrl(process.env.NOTION_PAGE_URL);
+    console.log("Successfully extracted NOTION_PAGE_ID:", NOTION_PAGE_ID);
+  } else {
+    console.error("NOTION_PAGE_URL environment variable is not set");
   }
-  throw Error("Failed to extract page ID from Notion URL");
+} catch (error) {
+  console.error("Error extracting page ID from NOTION_PAGE_URL:", error);
+}
+
+// If we still don't have a page ID, try to get it from notion-config.json
+if (!NOTION_PAGE_ID && databaseConfig.databases.supportTickets) {
+  console.log("No page ID extracted from URL, but we have a supportTickets database ID in config");
 }
 
 /**

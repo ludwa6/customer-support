@@ -34,6 +34,8 @@ if (process.env.NOTION_CONFIG_PATH) {
  */
 export async function getSupportTicketsDatabase() {
   try {
+    console.log("Looking for Support Tickets database...");
+    
     // First, try to use the database ID from configuration
     if (databaseConfig.databases.supportTickets) {
       const configuredDatabaseId = databaseConfig.databases.supportTickets;
@@ -43,25 +45,35 @@ export async function getSupportTicketsDatabase() {
         await notion.databases.retrieve({
           database_id: configuredDatabaseId
         });
-        console.log(`Successfully connected to database: ${configuredDatabaseId}`);
+        console.log(`Successfully connected to Support Tickets database: ${configuredDatabaseId}`);
         return configuredDatabaseId;
       } catch (configError) {
         console.error(`Error accessing configured database ID: ${configError.message}`);
         console.log("Falling back to searching for database by title...");
       }
+    } else {
+      console.log("No Support Tickets database ID found in configuration");
     }
     
     // If that fails, continue with the original logic
-    const ticketsDb = await findDatabaseByTitle("Support Tickets");
-    
-    if (ticketsDb) {
-      console.log(`Found existing Support Tickets database with ID: ${ticketsDb.id}`);
-      return ticketsDb.id;
+    try {
+      console.log("Searching for Support Tickets database by title...");
+      const ticketsDb = await findDatabaseByTitle("Support Tickets");
+      
+      if (ticketsDb) {
+        console.log(`Found existing Support Tickets database with ID: ${ticketsDb.id}`);
+        return ticketsDb.id;
+      } else {
+        console.log("No Support Tickets database found by title");
+      }
+    } catch (e) {
+      console.error("Error searching for Support Tickets database by title:", e);
     }
     
     // If database doesn't exist, create it
     if (NOTION_PAGE_ID) {
       console.log(`Creating new Support Tickets database in page: ${NOTION_PAGE_ID}`);
+      
       const newDb = await createDatabaseIfNotExists("Support Tickets", {
         full_name: {
           title: {}
