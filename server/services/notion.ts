@@ -384,8 +384,13 @@ export async function getArticleById(articleId: string) {
  */
 export async function getFAQs(categoryId?: string) {
   try {
-    // First look for a FAQs database by name
-    const faqsDb = await findDatabaseByTitle("FAQs");
+    // Look for a FAQs database by various possible names
+    let faqsDb = await findDatabaseByTitle("FAQs");
+    
+    // If not found with "FAQs", try "SerenityFlow FAQ"
+    if (!faqsDb) {
+      faqsDb = await findDatabaseByTitle("SerenityFlow FAQ");
+    }
     
     // Determine which database to use
     let DATABASE_ID;
