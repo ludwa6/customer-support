@@ -25,13 +25,21 @@ This guide will walk you through:
 3. Setting up the environment variables
 4. Initializing the Notion databases with sample content
 
-You can also verify your setup is working correctly with:
+You can verify your setup is working correctly with:
 
 ```bash
 node check-setup.js
 ```
 
 This will check if your Notion credentials are configured properly and verify connection to your Notion page.
+
+To use existing databases instead of creating new ones:
+
+```bash
+node use-existing-db.js
+```
+
+This will help you map your existing Notion databases to the application.
 
 ### Manual Setup
 
@@ -67,6 +75,10 @@ If you prefer to set up manually, follow these steps:
 
 #### Initializing Your Notion Database
 
+You have two options:
+
+#### Option 1: Create New Databases (Recommended for New Users)
+
 Run the setup script to create the necessary database structure in your Notion page:
 
 ```bash
@@ -79,6 +91,20 @@ This script will:
    - Articles
    - FAQs
 2. Populate these databases with sample content
+
+#### Option 2: Use Existing Databases
+
+If you already have databases in your Notion page that you want to use:
+
+```bash
+node use-existing-db.js
+```
+
+This script will:
+1. List all the databases in your Notion page
+2. Let you select which database to use for each type (Categories, Articles, FAQs)
+3. Create a configuration file mapping your databases
+4. Update the application code to use your existing databases
 
 ## Using the Application
 
@@ -118,10 +144,10 @@ This application uses Notion as its database through the Notion API. Here's how 
 
 1. You create a Notion integration in your workspace
 2. You connect a Notion page to this integration (giving it access)
-3. Our application uses your integration token to:
-   - Create databases in your Notion page (Categories, Articles, FAQs)
-   - Populate these databases with sample content
-   - Read from and write to these databases when the app runs
+3. Our application uses your integration token to either:
+   - **Option A**: Create new databases in your Notion page (Categories, Articles, FAQs) and populate them with sample content
+   - **Option B**: Connect to your existing databases if you choose to use them instead
+4. The application reads from and writes to these Notion databases when running
 
 ### Data flow:
 
