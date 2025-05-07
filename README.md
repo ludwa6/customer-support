@@ -74,8 +74,30 @@ If your Notion page already has databases:
 
 ## About Remixing
 
-When remixing this project:
+When remixing this project, you can seamlessly use your existing Notion databases instead of creating new ones:
 
-1. The app will automatically detect any existing databases in your Notion page
-2. It will create a configuration file (notion-config.json) to map these databases
-3. Add the `NOTION_CONFIG_PATH=./notion-config.json` environment variable to use your existing databases
+### Recommended Remix Workflow
+
+1. **Set Notion Secrets**: Add your `NOTION_INTEGRATION_SECRET` and `NOTION_PAGE_URL` environment variables
+2. **Run Auto-Setup**: Execute `node auto-setup.js` which will:
+   - Detect this is a remixed project
+   - Find existing databases in your Notion page
+   - Create a configuration to use them instead of creating duplicates
+3. **Make Config Permanent**: Add `NOTION_CONFIG_PATH=./notion-config.json` to your environment variables
+
+### Preventing Database Duplication
+
+The app includes multiple safeguards to prevent unwanted database creation:
+- A `.prevent-notion-setup` marker file is created during detection
+- The remixing logic in auto-setup.js prioritizes existing databases
+- Detection of existing databases happens automatically during server startup
+
+### Supported Database Types
+
+The system can detect and use these database types:
+- Categories (select options list)
+- Articles/Documentation
+- FAQs
+- Support Tickets
+
+If your Notion page doesn't have matching databases, you can use `node server/setup-notion.ts` to create them.

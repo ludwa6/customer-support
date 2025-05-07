@@ -6,7 +6,8 @@ let databaseConfig = {
   databases: {
     categories: null,
     articles: null,
-    faqs: null
+    faqs: null,
+    supportTickets: null
   }
 };
 
@@ -16,16 +17,30 @@ if (process.env.NOTION_CONFIG_PATH) {
     const configPath = process.env.NOTION_CONFIG_PATH;
     console.log(`Loading Notion database configuration from ${configPath}`);
     
-    // Load the configuration file
-    const configData = fs.readFileSync(configPath, 'utf8');
-    databaseConfig = JSON.parse(configData);
+    // Resolve relative path if needed
+    const resolvedPath = configPath.startsWith('./')
+      ? require('path').resolve(process.cwd(), configPath.slice(2))
+      : configPath;
     
-    console.log('Successfully loaded database configuration:');
-    console.log(`- Categories database: ${databaseConfig.databases.categories}`);
-    console.log(`- Articles database: ${databaseConfig.databases.articles}`);
-    console.log(`- FAQs database: ${databaseConfig.databases.faqs}`);
-  } catch (error) {
+    // Load the configuration file
+    const configData = fs.readFileSync(resolvedPath, 'utf8');
+    const parsedConfig = JSON.parse(configData);
+    
+    // Make sure we have a proper structure
+    if (parsedConfig && parsedConfig.databases) {
+      databaseConfig = parsedConfig;
+      
+      console.log('Successfully loaded database configuration:');
+      Object.keys(databaseConfig.databases).forEach(dbKey => {
+        const dbId = databaseConfig.databases[dbKey];
+        console.log(`- ${dbKey} database: ${dbId || 'Not configured'}`);
+      });
+    } else {
+      console.error('Invalid configuration format in Notion config file');
+    }
+  } catch (error: any) {
     console.error(`Error loading Notion configuration file: ${error.message}`);
+    console.error('Using default configuration instead');
   }
 }
 // Initialize Notion client

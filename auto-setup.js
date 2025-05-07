@@ -47,6 +47,35 @@ function printWarning(text) {
   console.log(colors.yellow + colors.bright + '! ' + text + colors.reset);
 }
 
+// Function to check if this is likely a remixed project
+function checkIfRemix() {
+  // These conditions might indicate a project is a remix:
+  
+  // 1. Check for remix-specific environment variable (could be set by the remixing system)
+  if (process.env.IS_REMIX === 'true') return true;
+  
+  // 2. Check if the project was recently created (remixes start fresh)
+  try {
+    const projectCreationTime = fs.statSync('.').birthtimeMs;
+    const currentTime = Date.now();
+    const projectAgeHours = (currentTime - projectCreationTime) / (1000 * 60 * 60);
+    
+    // If project is less than 1 hour old, it's likely a fresh remix
+    if (projectAgeHours < 1) return true;
+  } catch (err) {
+    // Ignore errors with file stats
+  }
+  
+  // 3. Check if this auto-setup.js is being run for the first time
+  // If we already have setup markers but no config, likely a remix scenario
+  if (!fs.existsSync('notion-config.json') && 
+      (fs.existsSync('.notion-db-exists') || fs.existsSync('.prevent-notion-setup'))) {
+    return true;
+  }
+  
+  return false;
+}
+
 // Main function to run the auto setup
 async function runAutoSetup() {
   printTitle('SerenityFlow Documentation Portal - Auto Setup');
@@ -68,7 +97,70 @@ async function runAutoSetup() {
   // Check for existing configuration
   const configFile = 'notion-config.json';
   const flagFile = '.notion-db-exists';
+  const preventSetupFile = '.prevent-notion-setup';
   
+  // SPECIAL CASE FOR REMIXING: Check if this is likely a remixed project
+  const isRemix = checkIfRemix();
+  if (isRemix) {
+    printStep('🔄 Detected that this is likely a remixed project');
+    printInfo('Will configure to use your existing databases instead of creating new ones');
+    
+    // Always create the prevent-setup file in remix case to prevent database duplication
+    if (!fs.existsSync(preventSetupFile)) {
+      fs.writeFileSync(preventSetupFile, 'true');
+      printInfo('Created prevention marker to avoid database duplication');
+    }
+    
+    // Force detection even if we already have a flag
+    printStep('Checking for databases in your Notion page...');
+    try {
+      await runCommand('node server/detect-notion-db.js');
+      
+      // If detection created or updated the config, it means databases were found
+      if (fs.existsSync(configFile)) {
+        // Set environment variable
+        if (!process.env.NOTION_CONFIG_PATH) {
+          process.env.NOTION_CONFIG_PATH = './' + configFile;
+          printInfo('Set NOTION_CONFIG_PATH to ./notion-config.json');
+        }
+        
+        // Try to read the config to see what was found
+        try {
+          const configData = JSON.parse(fs.readFileSync(configFile, 'utf8'));
+          const databases = configData.databases || {};
+          const foundDatabases = Object.keys(databases)
+            .filter(key => databases[key] !== null)
+            .join(', ');
+            
+          if (foundDatabases) {
+            printSuccess(`Found these databases: ${foundDatabases}`);
+          } else {
+            printWarning('No matching databases were found in your Notion page');
+            printInfo('You might need to run the configuration tool:');
+            printInfo('node use-existing-db.js');
+          }
+        } catch (err) {
+          printError('Error reading configuration file');
+        }
+      }
+      
+      // Add reminder for permanent configuration
+      printInfo('\nIMPORTANT: To make this configuration permanent, add this to your environment variables:');
+      printInfo('NOTION_CONFIG_PATH=./notion-config.json');
+      
+      printSuccess('Remix setup completed!');
+      printInfo('Your application is now configured to use your existing Notion databases.');
+      printInfo('To start the application, run: npm run dev');
+    } catch (error) {
+      printError('Error during remixed project setup:');
+      console.error(error);
+      printInfo('Please run the setup manually:');
+      printInfo('node use-existing-db.js');
+    }
+    return;
+  }
+  
+  // REGULAR SETUP FLOW (not a remix)
   if (fs.existsSync(configFile)) {
     printSuccess('Configuration file exists');
     
