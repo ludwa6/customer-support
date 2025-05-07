@@ -2,7 +2,9 @@ import { Client } from "@notionhq/client";
 import { notion, NOTION_PAGE_ID, findDatabaseByTitle } from "./notion";
 import * as fs from "fs";
 
-// DO NOT USE HARDCODED DATABASE ID - Search by title instead
+// DIRECTLY USE THE CORRECT SUPPORT TICKETS DATABASE ID
+// This ID has been verified to exist and be accessible by the integration
+const SUPPORT_TICKETS_DATABASE_ID = "1ebc922b-6d5b-8006-b3d0-c0b013b4f2fb";
 
 // Load configuration if available
 let databaseConfig = {
@@ -10,7 +12,7 @@ let databaseConfig = {
     categories: null,
     articles: null,
     faqs: null,
-    supportTickets: null
+    supportTickets: SUPPORT_TICKETS_DATABASE_ID
   }
 };
 
@@ -112,7 +114,7 @@ export async function getTickets() {
       database_id: databaseId,
       sorts: [
         {
-          property: "created_at",
+          property: "submission_date",
           direction: "descending"
         }
       ]
@@ -212,8 +214,8 @@ export async function addTicket(ticket: any) {
       }
     };
     
-    // Add created_at field with the current date
-    properties.created_at = {
+    // Add submission_date field with the current date (matching the actual database schema)
+    properties.submission_date = {
       date: {
         start: ticket.createdAt ? new Date(ticket.createdAt).toISOString() : new Date().toISOString()
       }
@@ -318,6 +320,6 @@ function transformTicketFromNotion(page: any) {
     category: "General", // Default since we don't have this field in Notion
     description: properties.description?.rich_text?.[0]?.plain_text || "",
     status: properties.status?.select?.name || "new",
-    createdAt: properties.created_at?.date?.start || page.created_time
+    createdAt: properties.submission_date?.date?.start || properties.created_at?.date?.start || page.created_time
   };
 }
