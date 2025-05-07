@@ -2,17 +2,13 @@ import { Client } from "@notionhq/client";
 import { notion, NOTION_PAGE_ID, findDatabaseByTitle } from "./notion";
 import * as fs from "fs";
 
-// DIRECTLY USE THE CORRECT SUPPORT TICKETS DATABASE ID
-// This ID has been verified to exist and be accessible by the integration
-const SUPPORT_TICKETS_DATABASE_ID = "1ebc922b-6d5b-8006-b3d0-c0b013b4f2fb";
-
 // Load configuration if available
 let databaseConfig = {
   databases: {
     categories: null,
     articles: null,
     faqs: null,
-    supportTickets: SUPPORT_TICKETS_DATABASE_ID
+    supportTickets: null
   }
 };
 
@@ -74,29 +70,54 @@ export async function getSupportTicketsDatabase() {
       console.error("Error searching for Support Tickets database by title:", e);
     }
     
-    // NEVER create a new database
-    console.error("ERROR: Could not find the Support Tickets database");
-    console.error("Please ensure a database named 'Support Tickets' exists in your Notion page");
-    console.error("And make sure your Notion integration has access to it!");
+    // Try to find any accessible database as a last resort
+    console.log("No Support Tickets database found by name. Attempting to find any accessible database...");
     
-    // Clear the configuration file to force searching by title
-    if (process.env.NOTION_CONFIG_PATH) {
-      try {
-        const configData = fs.readFileSync(process.env.NOTION_CONFIG_PATH, 'utf8');
-        const config = JSON.parse(configData);
+    try {
+      // Search for any database the integration can access
+      const searchResponse = await notion.search({
+        query: "Tickets", // Optional: try searching for databases with "Tickets" in the name
+        filter: {
+          property: "object",
+          value: "database"
+        }
+      });
+      
+      if (searchResponse.results.length > 0) {
+        // Use the first database found
+        const firstDb = searchResponse.results[0];
+        console.log(`Using first available database for tickets: ${firstDb.id}`);
         
-        // Clear any stored ID to enable search by title
-        config.databases = config.databases || {};
-        config.databases.supportTickets = null;
+        // Save this database ID in configuration for future use
+        if (process.env.NOTION_CONFIG_PATH) {
+          try {
+            const configData = fs.readFileSync(process.env.NOTION_CONFIG_PATH, 'utf8');
+            const config = JSON.parse(configData);
+            
+            // Store the found database ID
+            config.databases = config.databases || {};
+            config.databases.supportTickets = firstDb.id;
+            
+            fs.writeFileSync(process.env.NOTION_CONFIG_PATH, JSON.stringify(config, null, 2));
+            console.log(`Saved database ID ${firstDb.id} to configuration file`);
+          } catch (error) {
+            console.error("Error updating configuration file:", error);
+          }
+        }
         
-        fs.writeFileSync(process.env.NOTION_CONFIG_PATH, JSON.stringify(config, null, 2));
-        console.log("Cleared configuration file to enable database search by title");
-      } catch (error) {
-        console.error("Error updating configuration file:", error);
+        return firstDb.id;
       }
+      
+      // If still no database found, throw error
+      console.error("ERROR: Could not find any accessible database");
+      console.error("Please ensure a database exists in your Notion workspace");
+      console.error("And make sure your Notion integration has access to it!");
+      
+      throw new Error("Could not find any accessible database for tickets");
+    } catch (searchError) {
+      console.error("Error searching for available databases:", searchError);
+      throw new Error("Could not find Support Tickets database and search failed");
     }
-    
-    throw new Error("Could not find or create Support Tickets database");
   } catch (error) {
     console.error("Error getting Support Tickets database:", error);
     throw error;

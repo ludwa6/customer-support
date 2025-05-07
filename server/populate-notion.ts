@@ -6,8 +6,8 @@ const notion = new Client({
   auth: process.env.NOTION_INTEGRATION_SECRET
 });
 
-// Use the provided database ID directly
-const DATABASE_ID = "1ebc922b6d5b80729c9dd0d4f7ccf567";
+// Will dynamically find the database ID
+let DATABASE_ID: string;
 
 interface CategoryInfo {
   id: string;

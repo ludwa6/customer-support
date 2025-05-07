@@ -496,8 +496,30 @@ export async function getFAQs(categoryId?: string) {
       console.log("Using FAQs database from config");
       DATABASE_ID = databaseConfig.databases.faqs;
     } else {
-      console.log("Using hardcoded FAQ database ID");
-      DATABASE_ID = "1ebc922b6d5b80729c9dd0d4f7ccf567";
+      console.log("No FAQs database found. Attempting to search for any database...");
+      
+      try {
+        // Search for any database the integration can access
+        const searchResponse = await notion.search({
+          filter: {
+            property: "object",
+            value: "database"
+          },
+          page_size: 1
+        });
+        
+        if (searchResponse.results.length > 0) {
+          const firstDb = searchResponse.results[0];
+          console.log(`Using first available database for FAQs: ${firstDb.id}`);
+          DATABASE_ID = firstDb.id;
+        } else {
+          console.error("No databases found that the integration can access");
+          return []; // Return empty array if no database found
+        }
+      } catch (error) {
+        console.error("Error searching for databases:", error);
+        return []; // Return empty array on error
+      }
     }
     
     // Use properly formatted filter object or no filter
