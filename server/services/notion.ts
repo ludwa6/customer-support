@@ -174,8 +174,27 @@ export async function queryDatabase(databaseId: string, filter = {}, sorts = [])
  */
 export async function getCategories() {
   try {
-    // Using the direct DATABASE_ID since we know it now
-    const DATABASE_ID = databaseConfig.databases.faqs || "1ebc922b6d5b80729c9dd0d4f7ccf567";
+    // First try to find the FAQs database by name
+    const faqsDb = await findDatabaseByTitle("FAQs");
+    const categoriesDb = await findDatabaseByTitle("Categories");
+    
+    // Determine which database to use for categories
+    let DATABASE_ID;
+    
+    if (categoriesDb) {
+      console.log("Using Categories database for categories");
+      DATABASE_ID = categoriesDb.id;
+    } else if (faqsDb) {
+      console.log("Using FAQs database for categories");
+      DATABASE_ID = faqsDb.id;
+    } else if (databaseConfig.databases.faqs) {
+      // Try using the configuration if available
+      DATABASE_ID = databaseConfig.databases.faqs;
+    } else {
+      // Fallback to hardcoded ID as absolute last resort
+      console.log("No categories database found, using fallback");
+      DATABASE_ID = "1ebc922b6d5b80729c9dd0d4f7ccf567";
+    }
     
     // Retrieve the database to get category options
     const dbInfo = await notion.databases.retrieve({
