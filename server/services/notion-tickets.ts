@@ -186,7 +186,22 @@ export async function addTicket(ticket: any) {
     console.log(`Adding ticket to Notion database with ID: ${databaseId}`);
     
     // Create the page properties - matched to the exact schema of the database
+    // First, retrieve the database to get the actual schema
+    try {
+      console.log("Retrieving database schema before creating page...");
+      const dbSchema = await notion.databases.retrieve({
+        database_id: databaseId
+      });
+      
+      // Log the available properties for debugging
+      console.log("Available properties in database:", Object.keys(dbSchema.properties));
+    } catch (error) {
+      console.error("Error retrieving database schema:", error);
+    }
+    
+    // Create properties based on the schema we defined when creating the database
     const properties: any = {
+      // The title property must use the correct name (likely 'full_name')
       full_name: {
         title: [
           {
@@ -195,29 +210,36 @@ export async function addTicket(ticket: any) {
             }
           }
         ]
-      },
-      email: {
-        email: ticket.email
-      },
-      description: {
-        rich_text: [
-          {
-            text: {
-              // Just use the description directly
-              content: ticket.description.substring(0, 2000) // Using full available space
-            }
+      }
+    };
+    
+    // Add email if it exists in the schema
+    properties.email = {
+      email: ticket.email
+    };
+    
+    // Add description as rich text if it exists in the schema
+    properties.description = {
+      rich_text: [
+        {
+          text: {
+            content: ticket.description.substring(0, 2000) // Using full available space
           }
-        ]
-      },
-      status: {
-        select: {
-          name: ticket.status || 'new'
         }
-      },
-      submission_date: {
-        date: {
-          start: ticket.createdAt ? new Date(ticket.createdAt).toISOString() : new Date().toISOString()
-        }
+      ]
+    };
+    
+    // Add status field if it exists in the schema
+    properties.status = {
+      select: {
+        name: ticket.status || 'new'
+      }
+    };
+    
+    // Add created_at field with the current date
+    properties.created_at = {
+      date: {
+        start: ticket.createdAt ? new Date(ticket.createdAt).toISOString() : new Date().toISOString()
       }
     };
     
@@ -320,6 +342,6 @@ function transformTicketFromNotion(page: any) {
     category: "General", // Default since we don't have this field in Notion
     description: properties.description?.rich_text?.[0]?.plain_text || "",
     status: properties.status?.select?.name || "new",
-    createdAt: properties.submission_date?.date?.start || page.created_time
+    createdAt: properties.created_at?.date?.start || page.created_time
   };
 }
