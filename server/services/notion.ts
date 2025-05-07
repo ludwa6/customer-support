@@ -225,6 +225,12 @@ export async function getCategories() {
       DATABASE_ID = databaseConfig.databases.supportTickets;
     }
     
+    // 5. If still no database found, use the specific hardcoded ID
+    if (!DATABASE_ID) {
+      console.log("Using hardcoded FAQ database ID for categories");
+      DATABASE_ID = "1ebc922b6d5b80729c9dd0d4f7ccf567";
+    }
+    
     // If we found a database ID, use it
     if (DATABASE_ID) {
       // Retrieve the database to get category options
@@ -317,7 +323,7 @@ export async function getArticles(categoryId?: string, isPopular?: boolean) {
       DATABASE_ID = databaseConfig.databases.faqs;
       usingArticlesDb = false;
     } else {
-      console.log("No Articles or FAQs database found, using fallback");
+      console.log("Using hardcoded FAQ database ID for articles");
       DATABASE_ID = "1ebc922b6d5b80729c9dd0d4f7ccf567";
       usingArticlesDb = false;
     }
@@ -441,7 +447,7 @@ export async function getFAQs(categoryId?: string) {
       console.log("Using FAQs database from config");
       DATABASE_ID = databaseConfig.databases.faqs;
     } else {
-      console.log("No FAQs database found, using fallback");
+      console.log("Using hardcoded FAQ database ID");
       DATABASE_ID = "1ebc922b6d5b80729c9dd0d4f7ccf567";
     }
     
