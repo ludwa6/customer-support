@@ -25,6 +25,14 @@ This guide will walk you through:
 3. Setting up the environment variables
 4. Initializing the Notion databases with sample content
 
+You can also verify your setup is working correctly with:
+
+```bash
+node check-setup.js
+```
+
+This will check if your Notion credentials are configured properly and verify connection to your Notion page.
+
 ### Manual Setup
 
 If you prefer to set up manually, follow these steps:
@@ -89,6 +97,38 @@ After setting up, you can use the application to:
 - **Storage**: Notion API
 - **Styling**: Tailwind CSS with shadcn/ui components
 
+## Understanding the Notion Integration
+
+This application uses Notion as its database through the Notion API. Here's how it works:
+
+```
+┌─────────────────┐     ┌────────────────┐     ┌────────────────┐
+│                 │     │                │     │                │
+│  Your Notion    │     │  Notion API    │     │  SerenityFlow  │
+│  Page           │◄────┤  (with secret) │◄────┤  Application   │
+│                 │     │                │     │                │
+└─────────────────┘     └────────────────┘     └────────────────┘
+       ▲                                              │
+       │                                              │
+       └──────────────────────────────────────────────┘
+            Integration connection (user setup)
+```
+
+### What happens during setup:
+
+1. You create a Notion integration in your workspace
+2. You connect a Notion page to this integration (giving it access)
+3. Our application uses your integration token to:
+   - Create databases in your Notion page (Categories, Articles, FAQs)
+   - Populate these databases with sample content
+   - Read from and write to these databases when the app runs
+
+### Data flow:
+
+- When users browse documentation in the app → Data is fetched from Notion
+- When support tickets are submitted → They're stored in Notion
+- When content is updated in Notion → Changes appear in the app
+
 ## Additional Commands
 
 - `npm run dev` - Start the development server
@@ -107,9 +147,17 @@ You can customize the application by:
 
 If you encounter issues:
 
+- Run the setup check to verify your configuration:
+  ```bash
+  node check-setup.js
+  ```
 - Make sure your Notion integration has access to your page
 - Verify your environment variables are set correctly
 - Check the console logs for specific error messages
+- If you're still having trouble, try the interactive setup script:
+  ```bash
+  node setup.js
+  ```
 
 ## License
 
