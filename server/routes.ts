@@ -118,50 +118,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Articles API
+  // Articles API (Deprecated - Redirects to FAQs)
   app.get('/api/articles', async (req, res) => {
     try {
       const categoryId = req.query.categoryId as string;
-      const isPopular = req.query.isPopular === 'true';
       
-      const articles = await storage.getArticles(categoryId, isPopular);
-      res.json(articles);
+      // Redirect to FAQs with the same category filter
+      const faqs = await storage.getFAQs(categoryId);
+      
+      // Transform FAQs to match Article format for backwards compatibility
+      const transformedFaqs = faqs.map(faq => ({
+        id: faq.id,
+        title: faq.question,
+        content: faq.answer,
+        categoryId: faq.categoryId,
+        categoryName: faq.categoryName,
+        createdAt: new Date().toISOString(), // FAQs don't have timestamps
+        updatedAt: new Date().toISOString(),
+        isPopular: false
+      }));
+      
+      res.json(transformedFaqs);
     } catch (error) {
-      console.error('Error fetching articles:', error);
+      console.error('Error transforming FAQs to Articles:', error);
       res.status(500).json({ message: 'Failed to fetch articles' });
     }
   });
   
-  // Popular Articles API
+  // Popular Articles API (Deprecated - Redirects to FAQs)
   app.get('/api/articles/popular', async (req, res) => {
     try {
-      // Get all articles and take the first 5 as popular ones
-      // In a real app, you would have a specific flag in Notion for popular articles
-      const allArticles = await storage.getArticles();
+      // Get all FAQs and transform the first 5
+      const allFaqs = await storage.getFAQs();
       
-      // Just get 5 articles from the list
-      const popularArticles = allArticles.slice(0, 5);
+      // Transform FAQs to match Article format for backwards compatibility
+      const transformedFaqs = allFaqs.slice(0, 5).map(faq => ({
+        id: faq.id,
+        title: faq.question,
+        content: faq.answer,
+        categoryId: faq.categoryId,
+        categoryName: faq.categoryName,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        isPopular: true
+      }));
       
-      res.json(popularArticles);
+      res.json(transformedFaqs);
     } catch (error) {
-      console.error('Error fetching popular articles:', error);
+      console.error('Error transforming FAQs to popular Articles:', error);
       res.status(500).json({ message: 'Failed to fetch popular articles' });
     }
   });
   
-  // Article Details API
+  // Article Details API (Deprecated - Redirects to FAQs)
   app.get('/api/articles/:id', async (req, res) => {
     try {
-      const articleId = req.params.id;
-      const article = await storage.getArticleById(articleId);
+      const faqId = req.params.id;
       
-      if (!article) {
+      // Try to find a FAQ with the same ID
+      const faq = await storage.getFAQById(faqId);
+      
+      if (!faq) {
         return res.status(404).json({ message: 'Article not found' });
       }
       
-      res.json(article);
+      // Transform FAQ to match Article format
+      const transformedFaq = {
+        id: faq.id,
+        title: faq.question,
+        content: faq.answer,
+        categoryId: faq.categoryId,
+        categoryName: faq.categoryName,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        isPopular: false
+      };
+      
+      res.json(transformedFaq);
     } catch (error) {
-      console.error(`Error fetching article ${req.params.id}:`, error);
+      console.error(`Error transforming FAQ to Article ${req.params.id}:`, error);
       res.status(500).json({ message: 'Failed to fetch article' });
     }
   });
