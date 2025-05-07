@@ -164,11 +164,28 @@ async function listAllDatabases() {
     console.log('-----------------------------------------------------------');
     
     try {
-      const manualDbId = "1ebc922b6d5b8006b3d0c0b013b4f2fb";
-      console.log(`Attempting to access database with ID: ${manualDbId}`);
+      // Search for any database the integration can access
+      console.log("Searching for any accessible database...");
+      const searchResponse = await notion.search({
+        filter: {
+          property: "object",
+          value: "database"
+        },
+        page_size: 1
+      });
+      
+      if (searchResponse.results.length === 0) {
+        console.log("No databases found that the integration can access");
+        return;
+      }
+      
+      // Use the first database found
+      const firstDbId = searchResponse.results[0].id;
+      console.log(`Found database with ID: ${firstDbId}`);
+      console.log(`Attempting to access database with ID: ${firstDbId}`);
       
       const dbInfo = await notion.databases.retrieve({
-        database_id: manualDbId
+        database_id: firstDbId
       });
       
       // @ts-ignore
