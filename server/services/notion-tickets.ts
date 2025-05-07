@@ -162,8 +162,8 @@ export async function addTicket(ticket: any) {
         rich_text: [
           {
             text: {
-              // Include subject in the description
-              content: `Subject: ${ticket.subject || 'Support Request'}\n\n${ticket.description.substring(0, 1900)}` // Reduced to make space for the subject
+              // Just use the description directly
+              content: ticket.description.substring(0, 2000) // Using full available space
             }
           }
         ]
@@ -285,26 +285,13 @@ export async function updateTicketStatus(ticketId: string, status: string) {
 function transformTicketFromNotion(page: any) {
   const properties = page.properties;
   
-  // Parse subject from description if it exists
-  let description = properties.description?.rich_text?.[0]?.plain_text || "";
-  let subject = "Support Request";
-  
-  // Extract subject from description if it's in the format we saved
-  if (description.startsWith("Subject:")) {
-    const parts = description.split("\n\n");
-    if (parts.length >= 2) {
-      subject = parts[0].replace("Subject:", "").trim();
-      description = parts.slice(1).join("\n\n");
-    }
-  }
-  
   return {
     id: page.id,
     name: properties.full_name?.title?.[0]?.plain_text || "",
     email: properties.email?.email || "",
-    subject: subject,
+    subject: "Support Request", // Default subject as requested
     category: "General", // Default since we don't have this field in Notion
-    description: description,
+    description: properties.description?.rich_text?.[0]?.plain_text || "",
     status: properties.status?.select?.name || "new",
     createdAt: properties.submission_date?.date?.start || page.created_time
   };
