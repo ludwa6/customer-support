@@ -1,8 +1,8 @@
 {
   "databases": {
-    "categories": null,
-    "articles": null,
-    "faqs": null,
+    "categories": "1ecc922b-6d5b-8129-9fa8-c6df8ee02083",
+    "articles": "1ecc922b-6d5b-81fb-bbea-fb90790b73be",
+    "faqs": "1ecc922b-6d5b-8178-9913-ea3e59772f62",
     "supportTickets": "1ebc922b-6d5b-8006-b3d0-c0b013b4f2fb"
   }
 }
