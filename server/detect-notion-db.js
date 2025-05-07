@@ -130,10 +130,26 @@ async function detectDatabases() {
   }
 }
 
+// Create a marker file to indicate if we should prevent setup-notion.ts from running
+function createPreventSetupMarker() {
+  try {
+    fs.writeFileSync('.prevent-notion-setup', 'true');
+    console.log('Created marker file to prevent automatic database creation');
+  } catch (error) {
+    console.error('Error creating marker file:', error);
+  }
+}
+
 // Run the detection
 detectDatabases().then(hasExistingDatabases => {
-  if (!hasExistingDatabases) {
-    console.log('\nYou can create new databases by running:');
+  if (hasExistingDatabases) {
+    // If we found databases, create a marker to prevent setup-notion.ts from running
+    createPreventSetupMarker();
+    console.log('\nTo use these existing databases, run either:');
+    console.log('- node auto-setup.js (for automatic configuration)');
+    console.log('- node use-existing-db.js (for guided setup)');
+  } else {
+    console.log('\nNo existing databases found. You can create new databases by running:');
     console.log('node server/setup-notion.ts');
   }
 });

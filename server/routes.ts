@@ -149,6 +149,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Notion status API - used to check configuration for auto-setup
+  app.get('/api/notion-status', (req, res) => {
+    try {
+      const databasesDetected = fs.existsSync('.notion-db-exists');
+      const configExists = fs.existsSync('notion-config.json');
+      const preventSetupExists = fs.existsSync('.prevent-notion-setup');
+      
+      res.json({
+        notionIntegrationConfigured: !!process.env.NOTION_INTEGRATION_SECRET,
+        notionPageConfigured: !!process.env.NOTION_PAGE_URL,
+        notionConfigPathConfigured: !!process.env.NOTION_CONFIG_PATH,
+        databasesDetected,
+        configExists,
+        preventSetupExists
+      });
+    } catch (error) {
+      console.error('Error checking Notion status:', error);
+      res.status(500).json({ message: 'Failed to check Notion status' });
+    }
+  });
+
   // Support Tickets API
   app.post('/api/tickets', async (req, res) => {
     try {

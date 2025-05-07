@@ -4,6 +4,7 @@ import {
   PageObjectResponse,
   RichTextItemResponse
 } from "@notionhq/client/build/src/api-endpoints";
+import * as fs from "fs";
 
 // Helper function to extract page ID from URL
 function extractPageIdFromUrl(pageUrl: string): string {
@@ -505,6 +506,16 @@ async function seedFAQs(categories: CategoryInfo[]) {
 }
 
 // Main function to run the setup and seeding
+// Check if a marker file exists to prevent setup
+function shouldPreventSetup() {
+  try {
+    return fs.existsSync('.prevent-notion-setup');
+  } catch (error) {
+    console.error("Error checking for prevent setup marker:", error);
+    return false;
+  }
+}
+
 async function main() {
   try {
     // Check if we have the required environment variables
@@ -512,6 +523,15 @@ async function main() {
       console.error("Missing required environment variables: NOTION_INTEGRATION_SECRET and/or NOTION_PAGE_URL");
       console.error("Please set these variables and try again.");
       process.exit(1);
+    }
+
+    // Check if we should prevent setup because existing databases were found
+    if (shouldPreventSetup()) {
+      console.log("⚠️ Existing Notion databases detected!");
+      console.log("To prevent data loss, this script will not create new databases.");
+      console.log("To use existing databases, run: node use-existing-db.js");
+      console.log("If you really want to create new databases, delete the .prevent-notion-setup file and run this script again.");
+      process.exit(0);
     }
 
     // 1. First, create the databases
