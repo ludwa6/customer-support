@@ -36,7 +36,40 @@ app.use((req, res, next) => {
   next();
 });
 
+// Check for existing Notion databases if needed
+import { exec } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+
+// Function to check if Notion databases exist
+async function checkExistingNotionDatabases() {
+  // Only run if Notion environment variables are set
+  if (process.env.NOTION_INTEGRATION_SECRET && process.env.NOTION_PAGE_URL) {
+    // Check if we've already detected databases
+    const flagFile = '.notion-db-exists';
+    
+    if (!fs.existsSync(flagFile)) {
+      console.log('Checking for existing Notion databases...');
+      
+      // Run the detection script
+      return new Promise<void>((resolve) => {
+        exec('node server/detect-notion-db.js', (error, stdout, stderr) => {
+          if (error) {
+            console.error('Error checking Notion databases:', error);
+          } else {
+            console.log(stdout);
+          }
+          resolve();
+        });
+      });
+    }
+  }
+}
+
 (async () => {
+  // Check for existing Notion databases before proceeding
+  await checkExistingNotionDatabases();
+  
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

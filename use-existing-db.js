@@ -5,6 +5,9 @@
  * 
  * This script helps users connect to existing Notion databases instead of creating new ones.
  * It will map the existing database structure to the application's expected format.
+ * 
+ * When a user forks this template, it will automatically detect existing databases
+ * in their Notion page and prompt them to use those instead of creating new ones.
  */
 
 const readline = require('readline');

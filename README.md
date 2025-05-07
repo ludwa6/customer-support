@@ -144,10 +144,13 @@ This application uses Notion as its database through the Notion API. Here's how 
 
 1. You create a Notion integration in your workspace
 2. You connect a Notion page to this integration (giving it access)
-3. Our application uses your integration token to either:
-   - **Option A**: Create new databases in your Notion page (Categories, Articles, FAQs) and populate them with sample content
-   - **Option B**: Connect to your existing databases if you choose to use them instead
-4. The application reads from and writes to these Notion databases when running
+3. **Automatic Database Detection**: The application checks if your Notion page already contains databases
+   - If databases exist, it will prompt you to use the existing ones
+   - If no databases exist, it will offer to create new ones
+4. Based on your choice, the application either:
+   - **Option A**: Creates new databases in your Notion page (Categories, Articles, FAQs) and populates them with sample content
+   - **Option B**: Connects to your existing databases that you've selected
+5. The application reads from and writes to these Notion databases when running
 
 ### Data flow:
 
