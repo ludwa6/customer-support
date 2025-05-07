@@ -2,8 +2,7 @@ import { Client } from "@notionhq/client";
 import { notion, NOTION_PAGE_ID, findDatabaseByTitle } from "./notion";
 import * as fs from "fs";
 
-// HARDCODED DATABASE ID - Always use this
-const HARDCODED_SUPPORT_TICKETS_DB_ID = "1ebc922b-6d5b-81f3-8c6e-c02036587a9e";
+// DO NOT USE HARDCODED DATABASE ID - Search by title instead
 
 // Load configuration if available
 let databaseConfig = {
@@ -11,7 +10,7 @@ let databaseConfig = {
     categories: null,
     articles: null,
     faqs: null,
-    supportTickets: HARDCODED_SUPPORT_TICKETS_DB_ID // Always set this value
+    supportTickets: null
   }
 };
 
@@ -76,23 +75,20 @@ export async function getSupportTicketsDatabase() {
     // NEVER create a new database
     console.error("ERROR: Could not find the Support Tickets database");
     console.error("Please ensure a database named 'Support Tickets' exists in your Notion page");
-    console.error("Database ID: 1ebc922b-6d5b-81f3-8c6e-c02036587a9e");
+    console.error("And make sure your Notion integration has access to it!");
     
-    // Add this to the configuration file if it's missing
+    // Clear the configuration file to force searching by title
     if (process.env.NOTION_CONFIG_PATH) {
       try {
         const configData = fs.readFileSync(process.env.NOTION_CONFIG_PATH, 'utf8');
         const config = JSON.parse(configData);
         
-        // Force the correct database ID
+        // Clear any stored ID to enable search by title
         config.databases = config.databases || {};
-        config.databases.supportTickets = "1ebc922b-6d5b-81f3-8c6e-c02036587a9e";
+        config.databases.supportTickets = null;
         
         fs.writeFileSync(process.env.NOTION_CONFIG_PATH, JSON.stringify(config, null, 2));
-        console.log("Updated configuration file with hardcoded Support Tickets database ID");
-        
-        // Return the hardcoded ID
-        return "1ebc922b-6d5b-81f3-8c6e-c02036587a9e";
+        console.log("Cleared configuration file to enable database search by title");
       } catch (error) {
         console.error("Error updating configuration file:", error);
       }
