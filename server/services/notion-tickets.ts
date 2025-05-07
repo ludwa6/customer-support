@@ -6,14 +6,33 @@ import { notion, NOTION_PAGE_ID, findDatabaseByTitle, createDatabaseIfNotExists 
  */
 export async function getSupportTicketsDatabase() {
   try {
+    // First, try to use the specific database ID from the URL
+    const specificDatabaseId = "1ebc922b6d5b8006b3d0c0b013b4f2fb";
+    
+    try {
+      // Check if we can access this database directly
+      console.log(`Attempting to use specific database ID: ${specificDatabaseId}`);
+      await notion.databases.retrieve({
+        database_id: specificDatabaseId
+      });
+      console.log(`Successfully connected to database: ${specificDatabaseId}`);
+      return specificDatabaseId;
+    } catch (specificError) {
+      console.error(`Error accessing specific database ID: ${specificError.message}`);
+      console.log("Falling back to searching for database by title...");
+    }
+    
+    // If that fails, continue with the original logic
     const ticketsDb = await findDatabaseByTitle("Support Tickets");
     
     if (ticketsDb) {
+      console.log(`Found existing Support Tickets database with ID: ${ticketsDb.id}`);
       return ticketsDb.id;
     }
     
     // If database doesn't exist, create it
     if (NOTION_PAGE_ID) {
+      console.log(`Creating new Support Tickets database in page: ${NOTION_PAGE_ID}`);
       const newDb = await createDatabaseIfNotExists("Support Tickets", {
         full_name: {
           title: {}
@@ -54,6 +73,7 @@ export async function getSupportTicketsDatabase() {
         }
       });
       
+      console.log(`Created new Support Tickets database with ID: ${newDb.id}`);
       return newDb.id;
     }
     
