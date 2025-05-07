@@ -144,7 +144,7 @@ export async function addTicket(ticket: any) {
     // Log the database ID we're using
     console.log(`Adding ticket to Notion database with ID: ${databaseId}`);
     
-    // Create the page properties
+    // Create the page properties - matched to the exact schema of the database
     const properties: any = {
       full_name: {
         title: [
@@ -158,25 +158,12 @@ export async function addTicket(ticket: any) {
       email: {
         email: ticket.email
       },
-      subject: {
-        rich_text: [
-          {
-            text: {
-              content: ticket.subject || 'Support Request'
-            }
-          }
-        ]
-      },
-      category: {
-        select: {
-          name: ticket.category || 'General'
-        }
-      },
       description: {
         rich_text: [
           {
             text: {
-              content: ticket.description.substring(0, 2000) // Notion has a 2000 character limit for rich_text
+              // Include subject in the description
+              content: `Subject: ${ticket.subject || 'Support Request'}\n\n${ticket.description.substring(0, 1900)}` // Reduced to make space for the subject
             }
           }
         ]
@@ -186,7 +173,7 @@ export async function addTicket(ticket: any) {
           name: ticket.status || 'new'
         }
       },
-      created_at: {
+      submission_date: {
         date: {
           start: ticket.createdAt ? new Date(ticket.createdAt).toISOString() : new Date().toISOString()
         }
@@ -298,14 +285,27 @@ export async function updateTicketStatus(ticketId: string, status: string) {
 function transformTicketFromNotion(page: any) {
   const properties = page.properties;
   
+  // Parse subject from description if it exists
+  let description = properties.description?.rich_text?.[0]?.plain_text || "";
+  let subject = "Support Request";
+  
+  // Extract subject from description if it's in the format we saved
+  if (description.startsWith("Subject:")) {
+    const parts = description.split("\n\n");
+    if (parts.length >= 2) {
+      subject = parts[0].replace("Subject:", "").trim();
+      description = parts.slice(1).join("\n\n");
+    }
+  }
+  
   return {
     id: page.id,
     name: properties.full_name?.title?.[0]?.plain_text || "",
     email: properties.email?.email || "",
-    subject: properties.subject?.rich_text?.[0]?.plain_text || "Support Request",
-    category: properties.category?.select?.name || "General",
-    description: properties.description?.rich_text?.[0]?.plain_text || "",
+    subject: subject,
+    category: "General", // Default since we don't have this field in Notion
+    description: description,
     status: properties.status?.select?.name || "new",
-    createdAt: properties.created_at?.date?.start || page.created_time
+    createdAt: properties.submission_date?.date?.start || page.created_time
   };
 }
