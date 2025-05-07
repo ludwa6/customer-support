@@ -226,10 +226,33 @@ export async function getArticles(categoryId?: string, isPopular?: boolean) {
   try {
     // Look for the Articles database first
     const articlesDb = await findDatabaseByTitle("Articles");
+    const faqsDb = await findDatabaseByTitle("FAQs");
     
-    // If Articles database doesn't exist, use the FAQ database as a fallback
-    // This ensures we only show authentic data from Notion
-    const DATABASE_ID = databaseConfig.databases.articles || (articlesDb ? articlesDb.id : "1ebc922b6d5b80729c9dd0d4f7ccf567");
+    // Determine which database to use
+    let DATABASE_ID;
+    let usingArticlesDb = false;
+    
+    if (articlesDb) {
+      console.log("Using Articles database found by name");
+      DATABASE_ID = articlesDb.id;
+      usingArticlesDb = true;
+    } else if (databaseConfig.databases.articles) {
+      console.log("Using Articles database from config");
+      DATABASE_ID = databaseConfig.databases.articles;
+      usingArticlesDb = true;
+    } else if (faqsDb) {
+      console.log("Using FAQs database as fallback for articles");
+      DATABASE_ID = faqsDb.id;
+      usingArticlesDb = false;
+    } else if (databaseConfig.databases.faqs) {
+      console.log("Using FAQs database from config as fallback for articles");
+      DATABASE_ID = databaseConfig.databases.faqs;
+      usingArticlesDb = false;
+    } else {
+      console.log("No Articles or FAQs database found, using fallback");
+      DATABASE_ID = "1ebc922b6d5b80729c9dd0d4f7ccf567";
+      usingArticlesDb = false;
+    }
     
     // Use properly formatted query options
     const queryOptions: any = {
@@ -239,7 +262,7 @@ export async function getArticles(categoryId?: string, isPopular?: boolean) {
     // Add filter if categoryId is provided
     if (categoryId) {
       // For Articles database
-      if (articlesDb) {
+      if (usingArticlesDb) {
         queryOptions.filter = {
           property: "Category",
           relation: {
@@ -260,7 +283,7 @@ export async function getArticles(categoryId?: string, isPopular?: boolean) {
     // Sort by appropriate field based on database
     queryOptions.sorts = [
       {
-        property: articlesDb ? "Title" : "category",
+        property: usingArticlesDb ? "Title" : "category",
         direction: "ascending"
       }
     ];
@@ -273,7 +296,7 @@ export async function getArticles(categoryId?: string, isPopular?: boolean) {
     return response.results.map((page: any) => {
       const properties = page.properties;
       
-      if (articlesDb) {
+      if (usingArticlesDb) {
         // Format for Articles database
         return {
           id: page.id,
@@ -337,8 +360,22 @@ export async function getArticleById(articleId: string) {
  */
 export async function getFAQs(categoryId?: string) {
   try {
-    // Using the direct DATABASE_ID since we know it now
-    const DATABASE_ID = databaseConfig.databases.faqs || "1ebc922b6d5b80729c9dd0d4f7ccf567";
+    // First look for a FAQs database by name
+    const faqsDb = await findDatabaseByTitle("FAQs");
+    
+    // Determine which database to use
+    let DATABASE_ID;
+    
+    if (faqsDb) {
+      console.log("Using FAQs database found by name");
+      DATABASE_ID = faqsDb.id;
+    } else if (databaseConfig.databases.faqs) {
+      console.log("Using FAQs database from config");
+      DATABASE_ID = databaseConfig.databases.faqs;
+    } else {
+      console.log("No FAQs database found, using fallback");
+      DATABASE_ID = "1ebc922b6d5b80729c9dd0d4f7ccf567";
+    }
     
     // Use properly formatted filter object or no filter
     const queryOptions: any = {

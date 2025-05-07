@@ -1,51 +1,15 @@
-# SerenityFlow Documentation Portal-New
+# SerenityFlow Portal - Notion-Powered Documentation & Support
 
 An AI-powered customer support portal leveraging Notion databases for dynamic documentation and intelligent ticket management. The application provides a streamlined, user-friendly interface for submitting and tracking support requests with advanced filtering capabilities.
 
 ## Getting Started
 
-This application uses Notion as its database, so you'll need to set up a Notion integration and provide a Notion page to store your content before you can use it.
-
 ### Prerequisites
 
 - A Notion account
-- Node.js and npm (included in this Replit template)
+- Notion integration with access to your workspace
 
-### Quick Setup (Recommended)
-
-The easiest way to get started is to use the interactive setup script:
-
-```bash
-node setup.js
-```
-
-This guide will walk you through:
-1. Creating a Notion integration
-2. Sharing a page with your integration
-3. Setting up the environment variables
-4. Initializing the Notion databases with sample content
-
-You can verify your setup is working correctly with:
-
-```bash
-node check-setup.js
-```
-
-This will check if your Notion credentials are configured properly and verify connection to your Notion page.
-
-To use existing databases instead of creating new ones:
-
-```bash
-node use-existing-db.js
-```
-
-This will help you map your existing Notion databases to the application.
-
-### Manual Setup
-
-If you prefer to set up manually, follow these steps:
-
-#### Setting Up Your Notion Integration
+### Setting Up Your Notion Integration
 
 1. Go to [https://www.notion.so/my-integrations](https://www.notion.so/my-integrations)
 2. Click **"+ New integration"**
@@ -54,7 +18,7 @@ If you prefer to set up manually, follow these steps:
 5. Click **"Submit"**
 6. Copy the **"Internal Integration Secret"** - this will be your `NOTION_INTEGRATION_SECRET`
 
-#### Preparing Your Notion Page
+### Preparing Your Notion Page
 
 1. Create a new page in Notion or use an existing one
 2. Share this page with your integration:
@@ -64,7 +28,7 @@ If you prefer to set up manually, follow these steps:
    - Search for and select your integration name
 3. Copy the URL of this page - this will be your `NOTION_PAGE_URL`
 
-#### Setting Up Environment Variables
+### Setting Up Environment Variables
 
 1. In your Replit project, click on the lock icon 🔒 in the left sidebar (or press Ctrl+Shift+L)
 2. Add the following secrets:
@@ -73,121 +37,62 @@ If you prefer to set up manually, follow these steps:
    - **Key**: `NOTION_PAGE_URL`
    - **Value**: *paste your Notion page URL here*
 
-#### Initializing Your Notion Database
+### Working with Notion Databases
 
-You have two options:
+The application will work with your Notion page in one of two ways:
 
-#### Option 1: Create New Databases (Recommended for New Users)
+#### Option 1: Auto-detect Existing Databases
 
-Run the setup script to create the necessary database structure in your Notion page:
+If you already have databases in your Notion page, the application will automatically detect and use them if they match the expected names:
+- "Support Tickets" 
+- "Articles"
+- "FAQs"
+- "Categories"
+
+The application will prefer to use your existing databases first before creating new ones.
+
+#### Option 2: Create New Databases
+
+If no databases exist yet, you can run the setup script to create the necessary database structure in your Notion page:
 
 ```bash
 node server/setup-notion.ts
 ```
 
 This script will:
-1. Create three databases in your Notion page:
-   - Categories
-   - Articles
-   - FAQs
-2. Populate these databases with sample content
+1. Create databases in your Notion page:
+   - Support Tickets
+   - Articles (if needed)
+   - FAQs (if needed)
+   - Categories (if needed)
+2. Populate these databases with sample data
 
-#### Option 2: Use Existing Databases
+## Features
 
-If you already have databases in your Notion page that you want to use:
+- **Dynamic Documentation**: Content managed through Notion
+- **Intelligent Ticket Management**: Support tickets stored in Notion database
+- **Auto-detection**: Automatically finds and uses existing Notion databases
+- **Category Filtering**: Filter content by category
+- **Responsive Design**: Works on mobile, tablet, and desktop
 
-```bash
-node use-existing-db.js
-```
+## Technology Stack
 
-This script will:
-1. List all the databases in your Notion page
-2. Let you select which database to use for each type (Categories, Articles, FAQs)
-3. Create a configuration file mapping your databases
-4. Update the application code to use your existing databases
+- React frontend with wouter routing
+- Node.js backend
+- Notion API integration
+- TypeScript
+- Serverless architecture
 
-## Using the Application
+## Usage
 
-After setting up, you can use the application to:
-
-- Browse categories and documentation articles
-- Search for specific documentation
-- Read FAQs
-- Submit support tickets which are stored in Notion
-- Chat with the AI assistant for quick help
-
-## Application Structure
-
-- **Frontend**: React with wouter for routing
-- **Backend**: Node.js (Express)
-- **Storage**: Notion API
-- **Styling**: Tailwind CSS with shadcn/ui components
-
-## Understanding the Notion Integration
-
-This application uses Notion as its database through the Notion API. Here's how it works:
-
-```
-┌─────────────────┐     ┌────────────────┐     ┌────────────────┐
-│                 │     │                │     │                │
-│  Your Notion    │     │  Notion API    │     │  SerenityFlow  │
-│  Page           │◄────┤  (with secret) │◄────┤  Application   │
-│                 │     │                │     │                │
-└─────────────────┘     └────────────────┘     └────────────────┘
-       ▲                                              │
-       │                                              │
-       └──────────────────────────────────────────────┘
-            Integration connection (user setup)
-```
-
-### What happens during setup:
-
-1. You create a Notion integration in your workspace
-2. You connect a Notion page to this integration (giving it access)
-3. **Automatic Database Detection**: The application checks if your Notion page already contains databases
-   - If databases exist, it will prompt you to use the existing ones
-   - If no databases exist, it will offer to create new ones
-4. Based on your choice, the application either:
-   - **Option A**: Creates new databases in your Notion page (Categories, Articles, FAQs) and populates them with sample content
-   - **Option B**: Connects to your existing databases that you've selected
-5. The application reads from and writes to these Notion databases when running
-
-### Data flow:
-
-- When users browse documentation in the app → Data is fetched from Notion
-- When support tickets are submitted → They're stored in Notion
-- When content is updated in Notion → Changes appear in the app
-
-## Additional Commands
-
-- `npm run dev` - Start the development server
-- `node server/populate-notion.ts` - Add more sample content to your Notion databases
-- `node server/inspect-notion.ts` - Inspect your Notion database structure
-
-## Customization
-
-You can customize the application by:
-
-1. Modifying the sample content in `server/setup-notion.ts`
-2. Adding new categories and articles directly in your Notion page
-3. Customizing the UI components in the `client/src/components` directory
+Simply run the application and navigate to the web interface. All content is dynamically loaded from your Notion databases.
 
 ## Troubleshooting
 
-If you encounter issues:
+If you encounter issues with connecting to Notion:
 
-- Run the setup check to verify your configuration:
-  ```bash
-  node check-setup.js
-  ```
-- Make sure your Notion integration has access to your page
-- Verify your environment variables are set correctly
-- Check the console logs for specific error messages
-- If you're still having trouble, try the interactive setup script:
-  ```bash
-  node setup.js
-  ```
+1. Make sure your Notion integration secret is correct
+2. Verify that you've shared your Notion page with the integration
+3. Check that your page contains databases with the expected names, or run the setup script
 
-## License
-
-This project is available as an open-source template.
+For any other issues, please submit a support ticket through the application itself.
