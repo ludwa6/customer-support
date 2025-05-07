@@ -180,7 +180,7 @@ export async function addTicket(ticket: any) {
       }
     };
     
-    // Create array of child blocks
+    // Create array of child blocks - omitting Subject and Category as requested
     const children = [
       {
         object: "block",
@@ -201,20 +201,6 @@ export async function addTicket(ticket: any) {
         type: "paragraph",
         paragraph: {
           rich_text: [{ type: "text", text: { content: `Email: ${ticket.email}` } }]
-        }
-      },
-      {
-        object: "block",
-        type: "paragraph",
-        paragraph: {
-          rich_text: [{ type: "text", text: { content: `Subject: ${ticket.subject || 'Support Request'}` } }]
-        }
-      },
-      {
-        object: "block",
-        type: "paragraph",
-        paragraph: {
-          rich_text: [{ type: "text", text: { content: `Category: ${ticket.category || 'General'}` } }]
         }
       },
       {
