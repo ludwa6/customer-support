@@ -124,116 +124,121 @@ export async function addTicket(ticket: any) {
     // Log the database ID we're using
     console.log(`Adding ticket to Notion database with ID: ${databaseId}`);
     
+    // Create the page properties
+    const properties: any = {
+      full_name: {
+        title: [
+          {
+            text: {
+              content: ticket.name
+            }
+          }
+        ]
+      },
+      email: {
+        email: ticket.email
+      },
+      subject: {
+        rich_text: [
+          {
+            text: {
+              content: ticket.subject || 'Support Request'
+            }
+          }
+        ]
+      },
+      category: {
+        select: {
+          name: ticket.category || 'General'
+        }
+      },
+      description: {
+        rich_text: [
+          {
+            text: {
+              content: ticket.description.substring(0, 2000) // Notion has a 2000 character limit for rich_text
+            }
+          }
+        ]
+      },
+      status: {
+        select: {
+          name: ticket.status || 'new'
+        }
+      },
+      created_at: {
+        date: {
+          start: ticket.createdAt ? new Date(ticket.createdAt).toISOString() : new Date().toISOString()
+        }
+      }
+    };
+    
+    // Create array of child blocks
+    const children = [
+      {
+        object: "block",
+        type: "heading_2",
+        heading_2: {
+          rich_text: [{ type: "text", text: { content: "Support Ticket Details" } }]
+        }
+      },
+      {
+        object: "block",
+        type: "paragraph",
+        paragraph: {
+          rich_text: [{ type: "text", text: { content: `Name: ${ticket.name}` } }]
+        }
+      },
+      {
+        object: "block",
+        type: "paragraph",
+        paragraph: {
+          rich_text: [{ type: "text", text: { content: `Email: ${ticket.email}` } }]
+        }
+      },
+      {
+        object: "block",
+        type: "paragraph",
+        paragraph: {
+          rich_text: [{ type: "text", text: { content: `Subject: ${ticket.subject || 'Support Request'}` } }]
+        }
+      },
+      {
+        object: "block",
+        type: "paragraph",
+        paragraph: {
+          rich_text: [{ type: "text", text: { content: `Category: ${ticket.category || 'General'}` } }]
+        }
+      },
+      {
+        object: "block",
+        type: "heading_3",
+        heading_3: {
+          rich_text: [{ type: "text", text: { content: "Description" } }]
+        }
+      },
+      {
+        object: "block",
+        type: "paragraph",
+        paragraph: {
+          rich_text: [{ type: "text", text: { content: ticket.description } }]
+        }
+      }
+    ];
+    
+    // Prepare the full page data
     const pageData = {
       parent: {
         database_id: databaseId
       },
-      properties: {
-        full_name: {
-          title: [
-            {
-              text: {
-                content: ticket.name
-              }
-            }
-          ]
-        },
-        email: {
-          email: ticket.email
-        },
-        subject: {
-          rich_text: [
-            {
-              text: {
-                content: ticket.subject || 'Support Request'
-              }
-            }
-          ]
-        },
-        category: {
-          select: {
-            name: ticket.category || 'General'
-          }
-        },
-        description: {
-          rich_text: [
-            {
-              text: {
-                content: ticket.description.substring(0, 2000) // Notion has a 2000 character limit for rich_text
-              }
-            }
-          ]
-        },
-        status: {
-          select: {
-            name: ticket.status || 'new'
-          }
-        },
-        created_at: {
-          date: {
-            start: ticket.createdAt ? new Date(ticket.createdAt).toISOString() : new Date().toISOString()
-          }
-        }
-      },
-      // Add detailed content to the page
-      children: [
-        {
-          object: "block",
-          type: "heading_2",
-          heading_2: {
-            rich_text: [{ type: "text", text: { content: "Support Ticket Details" } }]
-          }
-        },
-        {
-          object: "block",
-          type: "paragraph",
-          paragraph: {
-            rich_text: [{ type: "text", text: { content: `Name: ${ticket.name}` } }]
-          }
-        },
-        {
-          object: "block",
-          type: "paragraph",
-          paragraph: {
-            rich_text: [{ type: "text", text: { content: `Email: ${ticket.email}` } }]
-          }
-        },
-        {
-          object: "block",
-          type: "paragraph",
-          paragraph: {
-            rich_text: [{ type: "text", text: { content: `Subject: ${ticket.subject || 'Support Request'}` } }]
-          }
-        },
-        {
-          object: "block",
-          type: "paragraph",
-          paragraph: {
-            rich_text: [{ type: "text", text: { content: `Category: ${ticket.category || 'General'}` } }]
-          }
-        },
-        {
-          object: "block",
-          type: "heading_3",
-          heading_3: {
-            rich_text: [{ type: "text", text: { content: "Description" } }]
-          }
-        },
-        {
-          object: "block",
-          type: "paragraph",
-          paragraph: {
-            rich_text: [{ type: "text", text: { content: ticket.description } }]
-          }
-        }
-      ]
+      properties: properties,
+      children: children
     };
     
-    console.log("Page data to be sent to Notion:", JSON.stringify(pageData, null, 2));
+    console.log("Creating page in Notion...");
     
     // Create the page in Notion
     const response = await notion.pages.create(pageData);
-    
     console.log("Response from Notion:", response.id);
     
     // Return the transformed ticket for consistent API responses
