@@ -230,10 +230,32 @@ export async function getCategories() {
       DATABASE_ID = databaseConfig.databases.supportTickets;
     }
     
-    // 5. If still no database found, use the specific hardcoded ID
+    // 5. If still no database found, try to search for any databases
     if (!DATABASE_ID) {
-      console.log("Using hardcoded FAQ database ID for categories");
-      DATABASE_ID = "1ebc922b6d5b80729c9dd0d4f7ccf567";
+      console.log("No Categories database found. Attempting to search for any database...");
+      
+      try {
+        // Search for any database the integration can access
+        const searchResponse = await notion.search({
+          filter: {
+            property: "object",
+            value: "database"
+          },
+          page_size: 1
+        });
+        
+        if (searchResponse.results.length > 0) {
+          const firstDb = searchResponse.results[0];
+          console.log(`Using first available database for categories: ${firstDb.id}`);
+          DATABASE_ID = firstDb.id;
+        } else {
+          console.error("No databases found that the integration can access");
+          return []; // Return empty array if no database found
+        }
+      } catch (error) {
+        console.error("Error searching for databases:", error);
+        return []; // Return empty array on error
+      }
     }
     
     // If we found a database ID, use it
@@ -328,9 +350,31 @@ export async function getArticles(categoryId?: string, isPopular?: boolean) {
       DATABASE_ID = databaseConfig.databases.faqs;
       usingArticlesDb = false;
     } else {
-      console.log("Using hardcoded FAQ database ID for articles");
-      DATABASE_ID = "1ebc922b6d5b80729c9dd0d4f7ccf567";
-      usingArticlesDb = false;
+      console.log("No Articles or FAQs database found. Attempting to search for any database...");
+      
+      try {
+        // Search for any database the integration can access
+        const searchResponse = await notion.search({
+          filter: {
+            property: "object",
+            value: "database"
+          },
+          page_size: 1
+        });
+        
+        if (searchResponse.results.length > 0) {
+          const firstDb = searchResponse.results[0];
+          console.log(`Using first available database for articles: ${firstDb.id}`);
+          DATABASE_ID = firstDb.id;
+          usingArticlesDb = false;
+        } else {
+          console.error("No databases found that the integration can access");
+          return []; // Return empty array if no database found
+        }
+      } catch (error) {
+        console.error("Error searching for databases:", error);
+        return []; // Return empty array on error
+      }
     }
     
     // Use properly formatted query options
