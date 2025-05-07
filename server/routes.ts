@@ -58,6 +58,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.warn("OpenAI integration is not configured. Set OPENAI_API_KEY in your environment variables.");
   }
   
+  // Test endpoint to verify Support Tickets database connection
+  app.get('/api/test-tickets-db', async (req, res) => {
+    try {
+      const { notion } = await import('./services/notion');
+      const { getSupportTicketsDatabase } = await import('./services/notion-tickets');
+      
+      // Try to get the database ID
+      const databaseId = await getSupportTicketsDatabase();
+      console.log(`Testing Support Tickets database with ID: ${databaseId}`);
+      
+      // Try to fetch the database schema
+      const dbInfo = await notion.databases.retrieve({
+        database_id: databaseId
+      });
+      
+      // Try to query the database
+      const ticketsResponse = await notion.databases.query({
+        database_id: databaseId,
+        page_size: 5
+      });
+      
+      // Format the response
+      const result = {
+        databaseId,
+        properties: Object.keys(dbInfo.properties),
+        ticketsCount: ticketsResponse.results.length,
+        tickets: ticketsResponse.results.map(page => {
+          const props = page.properties;
+          return {
+            id: page.id,
+            name: props.full_name?.title?.[0]?.plain_text || "Unknown",
+            email: props.email?.email || "No email",
+            status: props.status?.select?.name || "unknown",
+            date: props.submission_date?.date?.start || page.created_time
+          };
+        })
+      };
+      
+      res.json(result);
+    } catch (error) {
+      console.error('Error testing Support Tickets database:', error);
+      res.status(500).json({ 
+        error: 'Failed to test Support Tickets database',
+        message: error.message,
+        stack: error.stack
+      });
+    }
+  });
+  
   // Categories API
   app.get('/api/categories', async (req, res) => {
     try {
