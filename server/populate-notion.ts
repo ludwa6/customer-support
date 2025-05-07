@@ -371,21 +371,59 @@ async function main() {
       console.error("Please set this variable and try again.");
       process.exit(1);
     }
-
-    // 1. First, check the database schema
-    await getDatabaseSchema();
     
-    // 2. Add categories
-    const categories = await addCategories();
-    
-    // 3. Add articles
-    await addArticles(categories);
-    
-    // 4. Add FAQs
-    await addFAQs(categories);
-    
-    console.log("🎉 Notion database population completed successfully!");
-    console.log("You can now refresh your application to see the content.");
+    // Find or create a database to use for population
+    console.log("Looking for a database to use...");
+    try {
+      // First try to find a database by name
+      const databases = await notion.search({
+        query: "FAQs",
+        filter: {
+          property: "object",
+          value: "database"
+        }
+      });
+      
+      if (databases.results.length > 0) {
+        DATABASE_ID = databases.results[0].id;
+        console.log(`Found database by name search: ${DATABASE_ID}`);
+      } else {
+        // If no database found by name, search for any database
+        console.log("No database found by name, searching for any database...");
+        const anyDatabases = await notion.search({
+          filter: {
+            property: "object",
+            value: "database"
+          }
+        });
+        
+        if (anyDatabases.results.length > 0) {
+          DATABASE_ID = anyDatabases.results[0].id;
+          console.log(`Using first available database: ${DATABASE_ID}`);
+        } else {
+          console.error("No databases found. Make sure your integration has access to at least one database.");
+          process.exit(1);
+        }
+      }
+      
+      // 1. Check the database schema
+      await getDatabaseSchema();
+      
+      // 2. Add categories
+      const categories = await addCategories();
+      
+      // 3. Add articles
+      await addArticles(categories);
+      
+      // 4. Add FAQs
+      await addFAQs(categories);
+      
+      console.log("🎉 Notion database population completed successfully!");
+      console.log("You can now refresh your application to see the content.");
+    } catch (searchError) {
+      console.error("Error finding database:", searchError);
+      process.exit(1);
+    }
   } catch (error) {
     console.error("❌ Setup failed:", error);
     process.exit(1);

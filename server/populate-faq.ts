@@ -5,8 +5,8 @@ const notion = new Client({
   auth: process.env.NOTION_INTEGRATION_SECRET
 });
 
-// Use the provided database ID directly
-const DATABASE_ID = "1ebc922b6d5b80729c9dd0d4f7ccf567";
+// Will be populated with a database ID found at runtime
+let DATABASE_ID: string;
 
 async function populateFAQs() {
   console.log("Adding FAQs to the database...");
@@ -126,12 +126,52 @@ async function main() {
       console.error("Please set this variable and try again.");
       process.exit(1);
     }
-
-    // Add FAQs
-    const successCount = await populateFAQs();
     
-    console.log(`🎉 Successfully added ${successCount} FAQs to the Notion database!`);
-    console.log("You can now refresh your application to see the content.");
+    // Find a suitable database
+    console.log("Looking for a database to use...");
+    try {
+      // First try to find a database by name - preferring FAQs
+      const faqsDb = await notion.search({
+        query: "FAQs",
+        filter: {
+          property: "object",
+          value: "database"
+        }
+      });
+      
+      if (faqsDb.results.length > 0) {
+        // Use the first FAQ database found
+        DATABASE_ID = faqsDb.results[0].id;
+        console.log(`Using FAQ database: ${DATABASE_ID}`);
+      } else {
+        // If no FAQ database found, try to find any database
+        console.log("No FAQ database found, searching for any database...");
+        const anyDatabases = await notion.search({
+          filter: {
+            property: "object",
+            value: "database"
+          }
+        });
+        
+        if (anyDatabases.results.length > 0) {
+          // Use the first database found
+          DATABASE_ID = anyDatabases.results[0].id;
+          console.log(`Using first available database: ${DATABASE_ID}`);
+        } else {
+          console.error("No databases found. Make sure your integration has access to at least one database.");
+          process.exit(1);
+        }
+      }
+      
+      // Add FAQs
+      const successCount = await populateFAQs();
+      
+      console.log(`🎉 Successfully added ${successCount} FAQs to the Notion database!`);
+      console.log("You can now refresh your application to see the content.");
+    } catch (searchError) {
+      console.error("Error finding or using databases:", searchError);
+      process.exit(1);
+    }
   } catch (error) {
     console.error("❌ Setup failed:", error);
     process.exit(1);
