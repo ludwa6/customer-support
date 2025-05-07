@@ -1,6 +1,7 @@
 import { Client } from "@notionhq/client";
 import * as fs from "fs";
 import { extractPageIdFromUrl } from "./utils";
+import { validateDatabaseSchema, printValidationResult } from "./notion-validation";
 
 // Load database configuration from file if specified
 let databaseConfig = {
@@ -442,6 +443,44 @@ export async function getFAQs(categoryId?: string) {
       }
     }
     
+    // Validate the database schema if we have a DATABASE_ID
+    if (DATABASE_ID) {
+      try {
+        console.log("Validating FAQs database schema...");
+        
+        // Import the validation function if we haven't already
+        // This is imported at the top of the file in the real implementation
+        const { validateDatabaseSchema, printValidationResult } = await import("./notion-validation");
+        
+        const validationResult = await validateDatabaseSchema(
+          notion,
+          DATABASE_ID,
+          "faqs"
+        );
+        
+        if (validationResult.isValid) {
+          console.log("✅ FAQs database schema is valid");
+        } else {
+          console.warn("⚠️ FAQs database schema has issues:");
+          printValidationResult(validationResult, "faqs");
+          
+          // Check for critical missing properties
+          const criticalProps = ["Question", "Answer"];
+          const missingCritical = criticalProps.filter(prop => 
+            validationResult.properties.missing.includes(prop)
+          );
+          
+          if (missingCritical.length > 0) {
+            console.error(`Critical properties missing: ${missingCritical.join(", ")}`);
+            console.error("Will attempt to continue but data may be incomplete.");
+          }
+        }
+      } catch (validationError: any) {
+        console.error("Error validating FAQs database schema:", validationError.message);
+        // Continue despite validation error
+      }
+    }
+    
     // Use properly formatted filter object or no filter
     const queryOptions: any = {
       database_id: DATABASE_ID
@@ -456,17 +495,91 @@ export async function getFAQs(categoryId?: string) {
       };
     }
 
+    // Fetch the database to get its actual schema
+    let dbSchema;
+    try {
+      dbSchema = await notion.databases.retrieve({
+        database_id: DATABASE_ID
+      });
+      
+      // Log the available properties for debugging
+      const availableProperties = Object.keys(dbSchema.properties);
+      console.log("Available properties in FAQs database:", availableProperties.join(", "));
+    } catch (error) {
+      console.error("Error retrieving database schema:", error);
+      // Continue without schema info
+    }
+
     const response = await notion.databases.query(queryOptions);
     
     return response.results.map((page: any) => {
       const properties = page.properties;
       
+      // Determine which property is the title (question) property
+      let questionProperty = "question";
+      let answerProperty = "answer";
+      let categoryProperty = "category";
+      
+      // If we have the schema, find the title property for questions
+      if (dbSchema && dbSchema.properties) {
+        for (const [propName, propDetails] of Object.entries(dbSchema.properties)) {
+          if ((propDetails as any).type === "title") {
+            questionProperty = propName.toLowerCase();
+            console.log(`Found title property for questions: ${propName}`);
+            break;
+          }
+        }
+        
+        // Look for likely answer property
+        for (const propName of Object.keys(dbSchema.properties)) {
+          if (propName.toLowerCase().includes("answer") || 
+              propName.toLowerCase().includes("content") ||
+              propName.toLowerCase().includes("description")) {
+            answerProperty = propName;
+            console.log(`Found likely answer property: ${propName}`);
+            break;
+          }
+        }
+        
+        // Look for likely category property
+        for (const propName of Object.keys(dbSchema.properties)) {
+          if (propName.toLowerCase().includes("category") || 
+              propName.toLowerCase().includes("type") ||
+              propName.toLowerCase().includes("section")) {
+            categoryProperty = propName;
+            console.log(`Found likely category property: ${propName}`);
+            break;
+          }
+        }
+      }
+      
+      const titleProp = properties[questionProperty] || 
+                       properties["Question"] || 
+                       properties["Title"] || 
+                       Object.values(properties).find((p: any) => p.type === "title");
+                       
+      const questionText = titleProp?.title?.[0]?.plain_text || "Untitled Question";
+      
+      // Try to find answer in various possible properties
+      const answerProp = properties[answerProperty] || 
+                        properties["Answer"] || 
+                        properties["Content"] || 
+                        properties["Description"];
+                        
+      const answerText = answerProp?.rich_text?.[0]?.plain_text || "";
+      
+      // Try to find category in various possible properties
+      const catProp = properties[categoryProperty] || 
+                      properties["Category"] || 
+                      properties["Type"] || 
+                      properties["Section"];
+                      
       return {
         id: page.id,
-        question: properties.question?.title?.[0]?.plain_text || "Untitled Question",
-        answer: properties.answer?.rich_text?.[0]?.plain_text || "",
-        categoryId: properties.category?.select?.id || "",
-        categoryName: properties.category?.select?.name || "Uncategorized"
+        question: questionText,
+        answer: answerText,
+        categoryId: catProp?.select?.id || "",
+        categoryName: catProp?.select?.name || "Uncategorized"
       };
     });
   } catch (error) {

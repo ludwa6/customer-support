@@ -65,55 +65,134 @@ export async function validateDatabaseSchema(
       return result;
     }
 
-    // Check required properties
-    for (const requiredProp of schema.requiredProperties) {
-      if (!database.properties[requiredProp]) {
-        result.errors.push(`Missing required property: "${requiredProp}"`);
-        result.properties.missing.push(requiredProp);
+    // First build a map of required property types for easier checking
+    // For example, we need a title property for questions but it could be named
+    // "Question", "question", "Title", etc.
+    const requiredPropertyTypes = new Map<string, string[]>();
+    
+    // Initialize with empty arrays for each type
+    requiredPropertyTypes.set('title', []);
+    requiredPropertyTypes.set('rich_text', []);
+    requiredPropertyTypes.set('select', []);
+    requiredPropertyTypes.set('email', []);
+    requiredPropertyTypes.set('date', []);
+    requiredPropertyTypes.set('checkbox', []);
+    
+    // Organize required properties by their type
+    for (const [propName, propConfig] of Object.entries(schema.propertyTypes)) {
+      if (propConfig.required) {
+        const propsOfType = requiredPropertyTypes.get(propConfig.type) || [];
+        propsOfType.push(propName);
+        requiredPropertyTypes.set(propConfig.type, propsOfType);
+      }
+    }
+    
+    // Check if we have all required property types
+    const dbPropertyTypes = new Map<string, string[]>();
+    
+    // Group database properties by type
+    for (const [propName, property] of Object.entries(database.properties)) {
+      const propsOfType = dbPropertyTypes.get(property.type) || [];
+      propsOfType.push(propName);
+      dbPropertyTypes.set(property.type, propsOfType);
+    }
+    
+    // Check required property types
+    for (const [type, requiredProps] of requiredPropertyTypes.entries()) {
+      if (requiredProps.length > 0) {
+        // We need at least one property of this type
+        const dbProps = dbPropertyTypes.get(type) || [];
+        
+        if (dbProps.length === 0) {
+          // Missing this property type completely
+          result.errors.push(`Missing required property type: "${type}"`);
+          result.properties.missing.push(...requiredProps);
+        } else {
+          // We have this type, but need to check if specific required properties exist
+          // For FAQs, we handle specifically to allow alternate property names
+          if (databaseType === 'faqs') {
+            // For FAQs, we're more lenient - we just need properties of the right types
+            // with common names pattern (e.g., Question or Title for the title property)
+            
+            // Check for the question/title property (title type)
+            if (type === 'title' && requiredProps.includes('Question')) {
+              const titleProps = dbProps.filter(prop => 
+                prop.toLowerCase().includes('question') || 
+                prop.toLowerCase().includes('title'));
+              
+              if (titleProps.length === 0) {
+                result.errors.push('Missing title property for questions (no property with "question" or "title" in the name)');
+                result.properties.missing.push('Question');
+              } else {
+                result.properties.present.push('Question');
+              }
+            }
+            
+            // Check for the answer/content property (rich_text type)
+            if (type === 'rich_text' && requiredProps.includes('Answer')) {
+              const contentProps = dbProps.filter(prop => 
+                prop.toLowerCase().includes('answer') || 
+                prop.toLowerCase().includes('content') ||
+                prop.toLowerCase().includes('description'));
+              
+              if (contentProps.length === 0) {
+                result.errors.push('Missing content property for answers (no property with "answer", "content", or "description" in the name)');
+                result.properties.missing.push('Answer');
+              } else {
+                result.properties.present.push('Answer');
+              }
+            }
+          } else {
+            // For other database types, check the exact required properties
+            for (const requiredProp of requiredProps) {
+              if (!database.properties[requiredProp]) {
+                result.errors.push(`Missing required property: "${requiredProp}"`);
+                result.properties.missing.push(requiredProp);
+              } else {
+                result.properties.present.push(requiredProp);
+              }
+            }
+          }
+        }
       }
     }
 
-    // Validate property types and options
+    // Validate property types and options for existing properties
     for (const [propName, propConfig] of Object.entries(schema.propertyTypes)) {
       const property = database.properties[propName];
       
-      if (propConfig.required && !property) {
-        // Already logged above in required properties check
+      if (!property) {
+        // Skip properties that don't exist in the database
+        // They've already been handled in the required properties check
         continue;
       }
 
-      if (property) {
-        result.properties.present.push(propName);
-        
-        // Check property type
-        if (property.type !== propConfig.type) {
-          result.errors.push(
-            `Property "${propName}" has wrong type. Expected "${propConfig.type}", got "${property.type}"`
-          );
-          result.properties.incorrect.push(propName);
-        }
+      // Property exists, check its type
+      if (property.type !== propConfig.type) {
+        result.errors.push(
+          `Property "${propName}" has wrong type. Expected "${propConfig.type}", got "${property.type}"`
+        );
+        result.properties.incorrect.push(propName);
+      }
 
-        // Check select options if applicable
-        if (
-          propConfig.type === 'select' && 
-          propConfig.options && 
-          property.type === 'select' &&
-          property.select &&
-          property.select.options
-        ) {
-          const existingOptions = new Set(property.select.options.map((o: any) => o.name));
-          const missingOptions = propConfig.options.filter(
-            option => !existingOptions.has(option)
+      // Check select options if applicable
+      if (
+        propConfig.type === 'select' && 
+        propConfig.options && 
+        property.type === 'select' &&
+        property.select &&
+        property.select.options
+      ) {
+        const existingOptions = new Set(property.select.options.map((o: any) => o.name));
+        const missingOptions = propConfig.options.filter(
+          option => !existingOptions.has(option)
+        );
+        
+        if (missingOptions.length > 0) {
+          result.warnings.push(
+            `Property "${propName}" is missing select options: ${missingOptions.join(', ')}`
           );
-          
-          if (missingOptions.length > 0) {
-            result.warnings.push(
-              `Property "${propName}" is missing select options: ${missingOptions.join(', ')}`
-            );
-          }
         }
-      } else if (!propConfig.required) {
-        result.warnings.push(`Optional property "${propName}" is not present in the database`);
       }
     }
 

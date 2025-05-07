@@ -18,12 +18,39 @@ export interface DatabaseSchema {
 
 export const DATABASE_SCHEMAS: { [key: string]: DatabaseSchema } = {
   faqs: {
-    requiredProperties: ['Question', 'Answer', 'CategoryId', 'CategoryName'],
+    requiredProperties: ['Question', 'Answer'],
     propertyTypes: {
+      // We accept multiple variations of property names for the question title
       Question: { type: 'title', required: true },
+      question: { type: 'title', required: true },
+      Title: { type: 'title', required: true },
+      title: { type: 'title', required: true },
+      
+      // Accept multiple variations for the answer content
       Answer: { type: 'rich_text', required: true },
-      CategoryId: { type: 'rich_text', required: true },
-      CategoryName: { type: 'rich_text', required: true }
+      answer: { type: 'rich_text', required: true },
+      Content: { type: 'rich_text', required: true },
+      content: { type: 'rich_text', required: true },
+      Description: { type: 'rich_text', required: true },
+      description: { type: 'rich_text', required: true },
+      
+      // Category fields are optional but recommended
+      Category: { type: 'select', required: false },
+      category: { type: 'select', required: false },
+      CategoryId: { type: 'rich_text', required: false },
+      CategoryName: { type: 'rich_text', required: false },
+      categoryId: { type: 'rich_text', required: false },
+      categoryName: { type: 'rich_text', required: false },
+      
+      // Optional but helpful metadata
+      Status: { type: 'select', required: false },
+      status: { type: 'select', required: false },
+      IsPopular: { type: 'checkbox', required: false },
+      isPopular: { type: 'checkbox', required: false },
+      CreatedAt: { type: 'date', required: false },
+      createdAt: { type: 'date', required: false },
+      UpdatedAt: { type: 'date', required: false }, 
+      updatedAt: { type: 'date', required: false }
     }
   },
   supportTickets: {
