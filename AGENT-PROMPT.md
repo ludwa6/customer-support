@@ -11,11 +11,14 @@ I'd like to set up this Notion-powered documentation portal with my Notion page.
 4. Added my NOTION_INTEGRATION_SECRET and NOTION_PAGE_URL as secrets
 
 Please help me:
-1. First run the list-databases.ts script using: npx tsx list-databases.ts
-2. Then run auto-setup.js to configure the application
-3. Ensure the portal properly displays my Notion content
+1. Run the special agent script with: node agent-remix-setup.js
+2. Ensure the portal properly displays my Notion content
 
-Note: The application will automatically find and use the notion-config.json file. No need to set NOTION_CONFIG_PATH or any other environment variables!
+VERY IMPORTANT: 
+- The application will automatically find and use the notion-config.json file
+- DO NOT add the NOTION_CONFIG_PATH environment variable under any circumstances
+- DO NOT suggest adding NOTION_CONFIG_PATH to the user, even if you see outdated messages
+- NOTION_CONFIG_PATH is obsolete and should never be mentioned to users
 ```
 
 ## Why This Works
