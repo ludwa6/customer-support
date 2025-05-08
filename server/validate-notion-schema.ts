@@ -36,14 +36,38 @@ let databaseConfig = {
   }
 };
 
-// Check if a configuration file path is specified
-if (process.env.NOTION_CONFIG_PATH) {
+// Check for configuration file (always attempt to load it)
+const configPath = './notion-config.json';
+if (fs.existsSync(configPath)) {
   try {
-    const configPath = process.env.NOTION_CONFIG_PATH;
     console.log(`Loading Notion database configuration from ${configPath}`);
     
     // Load the configuration file
     const configData = fs.readFileSync(configPath, 'utf8');
+    const parsedConfig = JSON.parse(configData);
+    
+    // Make sure we have a proper structure
+    if (parsedConfig && parsedConfig.databases) {
+      databaseConfig = parsedConfig;
+      
+      console.log('Successfully loaded database configuration:');
+      Object.keys(databaseConfig.databases).forEach(dbKey => {
+        const dbId = databaseConfig.databases[dbKey];
+        console.log(`- ${dbKey} database: ${dbId || 'Not configured'}`);
+      });
+    } else {
+      console.error('Invalid configuration format in Notion config file');
+    }
+  } catch (error) {
+    console.error(`Error loading configuration file: ${error.message}`);
+  }
+} else if (process.env.NOTION_CONFIG_PATH) {
+  try {
+    const envConfigPath = process.env.NOTION_CONFIG_PATH;
+    console.log(`Loading Notion database configuration from env var: ${envConfigPath}`);
+    
+    // Load the configuration file from env var path
+    const configData = fs.readFileSync(envConfigPath, 'utf8');
     const parsedConfig = JSON.parse(configData);
     
     // Make sure we have a proper structure

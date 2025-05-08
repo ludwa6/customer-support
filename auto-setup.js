@@ -150,9 +150,9 @@ async function runAutoSetup() {
         }
       }
       
-      // Add reminder for permanent configuration
-      printInfo('\nIMPORTANT: To make this configuration permanent, add this to your environment variables:');
-      printInfo('NOTION_CONFIG_PATH=./notion-config.json');
+      // Add reassurance that no additional configuration is needed
+      printInfo('\nIMPORTANT: The application will automatically find and use the notion-config.json file.');
+      printInfo('No additional environment variables are needed!');
       
       printSuccess('Remix setup completed!');
       printInfo('Your application is now configured to use your existing Notion databases.');
@@ -197,9 +197,9 @@ async function runAutoSetup() {
       process.env.NOTION_CONFIG_PATH = './' + configFile;
       printInfo('Set NOTION_CONFIG_PATH to ./notion-config.json');
       
-      // Add reminder for permanent configuration
-      printInfo('\nIMPORTANT: To make this configuration permanent, add this to your environment variables:');
-      printInfo('NOTION_CONFIG_PATH=./notion-config.json');
+      // Add reassurance that no additional configuration is needed
+      printInfo('\nIMPORTANT: The application will automatically find and use the notion-config.json file.');
+      printInfo('No additional environment variables are needed!');
       
       // Check if any database is null
       const config = JSON.parse(fs.readFileSync(configFile, 'utf8'));
