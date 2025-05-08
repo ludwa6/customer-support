@@ -1,6 +1,6 @@
 # Remixing this Notion Documentation Portal
 
-This guide will help you successfully remix this project and connect it to your own Notion workspace.
+This guide will help you successfully remix this project and connect it to your own Notion workspace. We provide a ready-to-use Notion template with pre-configured databases that you can duplicate to get started quickly.
 
 ## Prerequisites
 
@@ -8,11 +8,20 @@ Before you remix, make sure you have:
 
 1. A Notion account with admin access to a workspace
 2. The ability to create a Notion integration
-3. A Notion page that will serve as your documentation portal's root
+3. Permission to duplicate a template in your Notion workspace
 
 ## Step-by-Step Remix Guide
 
-### 1. Create a Notion Integration
+### 1. Duplicate the Notion Template
+
+Start by duplicating our pre-configured Notion template that includes all the necessary databases:
+
+1. Go to the template page: [Customer Support Admin TEMPLATE](https://mannybernabe.notion.site/Customer-Support-Admin-TEMPLATE-1ebc922b6d5b808e827ae3f3ab4fbe43)
+2. Click "Duplicate" in the top-right corner
+3. Select the workspace where you want to save the template
+4. Once duplicated, this page will contain all the required databases already structured correctly
+
+### 2. Create a Notion Integration
 
 1. Go to [https://www.notion.so/my-integrations](https://www.notion.so/my-integrations)
 2. Click "New integration"
@@ -23,15 +32,15 @@ Before you remix, make sure you have:
 
 > **Important:** Create a dedicated integration specifically for this project instead of reusing an existing one. Using a dedicated integration helps avoid conflicts with other applications and makes it much easier to identify the correct databases during setup.
 
-### 2. Prepare a Notion Page
+### 3. Connect the Integration to Your Page
 
-1. Open Notion and create a new page (or use an existing one)
+1. Open your duplicated template page from step 1
 2. Click the "..." menu in the top right
 3. Select "Add connections"
 4. Find and select the integration you just created
 5. **Copy the URL of this page** - you'll need this later
 
-### 3. Remix the Project
+### 4. Remix the Project
 
 1. Click the "Remix" button to create your own copy of this project
 2. Once the remix completes, go to the "Secrets" tool in the left sidebar
@@ -39,16 +48,17 @@ Before you remix, make sure you have:
    - `NOTION_INTEGRATION_SECRET`: Paste the integration secret you copied
    - `NOTION_PAGE_URL`: Paste the Notion page URL you copied
 
-### 4. Set Up with the AI Assistant
+### 5. Set Up with the AI Assistant
 
 Once you've added your secrets, use this exact prompt with the Replit Agent:
 
 ```
-I'd like to set up this Notion-powered documentation portal with my existing Notion page. I've already:
+I'd like to set up this Notion-powered documentation portal with my Notion page. I've already:
 
-1. Created a dedicated Notion integration at https://www.notion.so/my-integrations specifically for this project
-2. Shared a Notion page with this integration
-3. Added my NOTION_INTEGRATION_SECRET and NOTION_PAGE_URL as secrets
+1. Duplicated the template Notion page with pre-configured databases
+2. Created a dedicated Notion integration at https://www.notion.so/my-integrations
+3. Connected my duplicated page with this integration
+4. Added my NOTION_INTEGRATION_SECRET and NOTION_PAGE_URL as secrets
 
 Please help me:
 1. First run the list-databases.ts script to identify all databases in my Notion page
@@ -119,8 +129,8 @@ I want to customize the AI Chatbot in my remixed SerenityFlow Documentation Port
 
 3. Also change the chat button text to say "Chat with {insert name} Support" 
 
-4. If possible, I'd also like to customize the AI model parameters, such as:
-   - Adjust the temperature to [VALUE: 0.0-1.0] to make responses more/less creative
+4. I'd also like to customize the AI model parameters in server/services/openai.ts:
+   - Adjust the temperature to [VALUE: 0.0-1.0] (higher for more creative responses)
    - Change the max_tokens to [VALUE: 100-1000] to adjust response length
 
 Please make these changes while preserving all the existing functionality. After you're done, restart the application so I can see my customized AI Assistant in action.
