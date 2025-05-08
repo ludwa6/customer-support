@@ -61,8 +61,8 @@ export const DATABASE_SCHEMAS: { [key: string]: DatabaseSchema } = {
       description: { type: 'rich_text', required: true },
       status: { 
         type: 'select', 
-        required: true,
-        options: ['new', 'in-progress', 'resolved', 'closed']
+        required: true
+        // Allow any status values - don't enforce specific options
       },
       submission_date: { type: 'date', required: false }
     }

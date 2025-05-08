@@ -183,15 +183,19 @@ export async function validateDatabaseSchema(
         property.select &&
         property.select.options
       ) {
-        const existingOptions = new Set(property.select.options.map((o: any) => o.name));
-        const missingOptions = propConfig.options.filter(
-          option => !existingOptions.has(option)
-        );
-        
-        if (missingOptions.length > 0) {
-          result.warnings.push(
-            `Property "${propName}" is missing select options: ${missingOptions.join(', ')}`
+        // For Support Tickets status, we won't warn about missing options
+        // This allows users to customize their own status values
+        if (!(databaseType === 'supportTickets' && propName === 'status')) {
+          const existingOptions = new Set(property.select.options.map((o: any) => o.name));
+          const missingOptions = propConfig.options.filter(
+            option => !existingOptions.has(option)
           );
+          
+          if (missingOptions.length > 0) {
+            result.warnings.push(
+              `Property "${propName}" is missing select options: ${missingOptions.join(', ')}`
+            );
+          }
         }
       }
     }
