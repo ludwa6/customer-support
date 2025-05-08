@@ -54,8 +54,8 @@ async function checkExistingNotionDatabases() {
     const configFile = 'notion-config.json';
     const preventSetupFile = '.prevent-notion-setup';
     
-    // Create the prevent-setup file if it doesn't exist but we do have a config
-    if (!fs.existsSync(preventSetupFile) && fs.existsSync(configFile)) {
+    // Always create the prevent-setup file to ensure no new databases are created in any scenario
+    if (!fs.existsSync(preventSetupFile)) {
       fs.writeFileSync(preventSetupFile, 'true');
       console.log('Created .prevent-notion-setup file to prevent database creation');
     }
