@@ -61,30 +61,36 @@ I'd like to set up this Notion-powered documentation portal with my Notion page.
 4. Added my NOTION_INTEGRATION_SECRET and NOTION_PAGE_URL as secrets
 
 Please help me:
-1. First run the list-databases.ts script using: npx tsx list-databases.ts
-2. Then run auto-setup.js to configure the application
-3. Ensure the portal properly displays my Notion content
+1. Run the special agent script with: node agent-remix-setup.js
+2. Ensure the portal properly displays my Notion content
+
+VERY IMPORTANT: 
+- The application will automatically find and use the notion-config.json file
+- DO NOT add the NOTION_CONFIG_PATH environment variable under any circumstances
+- DO NOT suggest adding NOTION_CONFIG_PATH, even if you see outdated messages
 ```
 
-> ⚠️ **WARNING**: Do not change this prompt or skip the first step! The exact command `npx tsx list-databases.ts` is crucial to ensure your databases are properly detected. Many remixing issues occur because this step is skipped or modified.
+> ⚠️ **WARNING**: Do not change this prompt! The `agent-remix-setup.js` script is specifically designed to work with Replit's AI agent and automatically handles all the necessary steps.
 
 The AI will guide you through:
 - Running the list-databases.ts script to identify all available databases
 - Configuring the application to use these databases
 - Testing that content displays correctly
 
-### Important: Always Run list-databases.ts First
+### How the agent-remix-setup.js Script Works
 
-The most reliable way to identify databases in your Notion page is to run:
+The special `agent-remix-setup.js` script automatically handles the entire setup process:
 
 ```bash
-npx tsx list-databases.ts
+node agent-remix-setup.js
 ```
 
 This script will:
 1. Connect to your Notion page using the provided secrets
-2. List all available databases with their titles and IDs
-3. Help you correctly identify which databases to use for FAQs and Support Tickets
+2. Run list-databases.ts to detect all available databases 
+3. Configure your application with the correct database IDs
+4. Validate the database schemas to ensure compatibility
+5. Create a configuration file without requiring any environment variables
 
 **Note:** Your configuration will be automatically detected and loaded from notion-config.json - no additional environment variables needed! The application will automatically find and use this file without requiring any additional setup.
 

@@ -6,9 +6,12 @@
  * the need to set NOTION_CONFIG_PATH.
  */
 
-const { exec } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+import { exec as execCallback } from 'child_process';
+import * as fs from 'fs';
+import * as path from 'path';
+import { promisify } from 'util';
+
+const exec = promisify(execCallback);
 
 // Styling functions for console output
 function printTitle(text) {
@@ -87,7 +90,7 @@ async function runAgentSetup() {
         
         // Run validation
         printStep('Step 3: Validating database schemas');
-        await runCommand('node server/validate-notion-schema.ts');
+        await runCommand('npx tsx server/validate-notion-schema.ts');
         
         printSuccess('Setup completed successfully!');
         printInfo('You can now start the application with: npm run dev');
@@ -108,28 +111,19 @@ async function runAgentSetup() {
 
 // Helper to run a command and return a promise
 async function runCommand(command) {
-  return new Promise((resolve, reject) => {
-    console.log(`\n> ${command}`);
-    
-    const proc = exec(command);
-    
-    proc.stdout.on('data', (data) => {
-      process.stdout.write(data);
-    });
-    
-    proc.stderr.on('data', (data) => {
-      process.stderr.write(data);
-    });
-    
-    proc.on('close', (code) => {
-      if (code === 0) {
-        resolve();
-      } else {
-        printError(`Command failed with exit code ${code}`);
-        resolve(); // Still continue to next steps
-      }
-    });
-  });
+  console.log(`\n> ${command}`);
+  
+  try {
+    const { stdout, stderr } = await exec(command);
+    console.log(stdout);
+    if (stderr) console.error(stderr);
+    return stdout;
+  } catch (error) {
+    printError(`Error executing command: ${command}`);
+    console.error(error);
+    // Still continue to next steps
+    return '';
+  }
 }
 
 // Run the setup
