@@ -127,11 +127,8 @@ async function runAutoSetup() {
       
       // If detection created or updated the config, it means databases were found
       if (fs.existsSync(configFile)) {
-        // Set environment variable
-        if (!process.env.NOTION_CONFIG_PATH) {
-          process.env.NOTION_CONFIG_PATH = './' + configFile;
-          printInfo('Set NOTION_CONFIG_PATH to ./notion-config.json');
-        }
+        // No need to set environment variables - the app will automatically find notion-config.json
+        printInfo('Detected notion-config.json file');
         
         // Try to read the config to see what was found
         try {

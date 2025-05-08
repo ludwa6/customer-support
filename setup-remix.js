@@ -111,6 +111,13 @@ async function setup() {
         
         if (configuredDbs.length > 0) {
           printSuccess(`Successfully configured databases: ${configuredDbs.join(', ')}`);
+          
+          // Create a file to indicate automatic configuration was successful
+          fs.writeFileSync('.notion-setup-complete', 'true');
+          printInfo('Created .notion-setup-complete marker file');
+          
+          // No need to set environment variables - the app will automatically find notion-config.json
+          printSuccess('Configuration complete! No additional environment variables needed.');
         } else {
           printWarning('No databases were automatically configured.');
           printInfo('You may need to run the guided setup:');

@@ -14,6 +14,8 @@ Please help me:
 1. First run the list-databases.ts script using: npx tsx list-databases.ts
 2. Then run auto-setup.js to configure the application
 3. Ensure the portal properly displays my Notion content
+
+Note: The application will automatically find and use the notion-config.json file. No need to set NOTION_CONFIG_PATH or any other environment variables!
 ```
 
 ## Why This Works

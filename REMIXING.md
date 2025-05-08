@@ -86,7 +86,7 @@ This script will:
 2. List all available databases with their titles and IDs
 3. Help you correctly identify which databases to use for FAQs and Support Tickets
 
-**Note:** Your configuration will be automatically detected and loaded from notion-config.json - no additional environment variables needed!
+**Note:** Your configuration will be automatically detected and loaded from notion-config.json - no additional environment variables needed! The application will automatically find and use this file without requiring any additional setup.
 
 ## Database Requirements
 
