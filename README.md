@@ -70,7 +70,7 @@ If your Notion page already has databases:
 
 - **Content not appearing**: Check that your Notion page is shared with the integration
 - **Database connection issues**: Verify that the `NOTION_CONFIG_PATH` environment variable is set correctly
-- **Missing databases**: Run `node server/setup-notion.ts` to create the required databases
+- **Missing databases**: Use the `node use-existing-db.js` script to configure existing databases in your Notion page
 
 ## About Remixing
 
@@ -87,8 +87,9 @@ When remixing this project, you can seamlessly use your existing Notion database
 
 ### Preventing Database Duplication
 
-The app includes multiple safeguards to prevent unwanted database creation:
-- A `.prevent-notion-setup` marker file is created during detection
+The app includes enhanced safeguards to prevent any database creation in remixed projects:
+- A `.prevent-notion-setup` marker file is automatically created on startup
+- All database creation functions have been modified to never create new databases
 - The remixing logic in auto-setup.js prioritizes existing databases
 - Detection of existing databases happens automatically during server startup
 
@@ -100,4 +101,4 @@ The system can detect and use these database types:
 - FAQs
 - Support Tickets
 
-If your Notion page doesn't have matching databases, you can use `node server/setup-notion.ts` to create them.
+Before remixing, make sure your Notion page already contains these databases. The application is now designed to only use existing databases, never creating new ones in remixed projects.
