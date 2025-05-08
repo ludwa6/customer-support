@@ -74,16 +74,14 @@ If your Notion page already has databases:
 
 ## About Remixing
 
-When remixing this project, you can seamlessly use your existing Notion databases instead of creating new ones:
+When remixing this project, you can seamlessly use your existing Notion databases instead of creating new ones.
 
-### Recommended Remix Workflow
+### Quick Remix Instructions
 
-1. **Set Notion Secrets**: Add your `NOTION_INTEGRATION_SECRET` and `NOTION_PAGE_URL` environment variables
-2. **Run Auto-Setup**: Execute `node auto-setup.js` which will:
-   - Detect this is a remixed project
-   - Find existing databases in your Notion page
-   - Create a configuration to use them instead of creating duplicates
-3. **Make Config Permanent**: Add `NOTION_CONFIG_PATH=./notion-config.json` to your environment variables
+1. **See [REMIXING.md](./REMIXING.md) for a complete guide with ready-to-use prompts**
+2. **Set Notion Secrets**: Add your `NOTION_INTEGRATION_SECRET` and `NOTION_PAGE_URL` environment variables
+3. **Use the AI Assistant**: Ask it to detect and configure your existing Notion databases
+4. **Start the App**: Once configured, the app will use your existing Notion content
 
 ### Preventing Database Duplication
 
