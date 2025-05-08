@@ -61,15 +61,17 @@ The AI will guide you through:
 
 ## Database Adaptability
 
-The application will adapt to whatever databases exist in your Notion page. The main databases it uses are:
+The application is highly adaptable and will work with whatever databases exist in your Notion page. The main databases it uses are:
 
-- A database for categories/sections 
 - A database for FAQs (the main content type)
 - A database for support tickets (optional)
 
-**Note:** The application previously used an Articles database, but that functionality has been merged with FAQs. If you have existing Articles databases, they won't be used.
+**Important Notes:**
+- You don't need a dedicated Categories database - the application can extract category information from any database with select-type properties (like dropdown fields)
+- The application previously used an Articles database, but that functionality has been merged with FAQs
+- Even databases with different names will work - the system will detect them and adapt accordingly
 
-You don't need to have all of these databases. The application will use whatever it finds and adapt accordingly. Even databases with different names or structures can work - the system will detect them and configure itself to use what's available.
+For the best experience, make sure your Notion page contains at least one database with some content. The application will intelligently configure itself based on whatever it finds available.
 
 ## Troubleshooting
 
