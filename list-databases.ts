@@ -69,7 +69,26 @@ async function listAllDatabases() {
           console.log(`${i+1}. Database: "${title}"`);
           console.log(`   ID: ${db.id}`);
           // @ts-ignore
-          console.log(`   Properties: ${Object.keys(db.properties || {}).join(', ')}`);
+          const properties = Object.keys(db.properties || {});
+          console.log(`   Properties: ${properties.join(', ')}`);
+          
+          // Print recommendations for mapping
+          if (properties.some(prop => 
+            prop.toLowerCase().includes('question') || 
+            prop.toLowerCase().includes('answer') ||
+            prop.toLowerCase().includes('faq')
+          )) {
+            console.log(`   👉 This database might be suitable for FAQs`);
+          }
+          
+          if (properties.some(prop => 
+            prop.toLowerCase().includes('ticket') || 
+            prop.toLowerCase().includes('support') ||
+            (prop.toLowerCase().includes('status') && 
+             properties.some(p => p.toLowerCase().includes('email')))
+          )) {
+            console.log(`   👉 This database might be suitable for Support Tickets`);
+          }
           console.log('----------------------------');
         }
       } else {
@@ -137,6 +156,24 @@ async function listAllDatabases() {
               console.log(`${databaseCount}. Database: "${title}"`);
               console.log(`   ID: ${block.id}`);
               console.log(`   Properties: ${Object.keys(db.properties).join(', ')}`);
+              
+              // Print recommendations for mapping
+              if (Object.keys(db.properties).some(prop => 
+                prop.toLowerCase().includes('question') || 
+                prop.toLowerCase().includes('answer') ||
+                prop.toLowerCase().includes('faq')
+              )) {
+                console.log(`   👉 This database might be suitable for FAQs`);
+              }
+              
+              if (Object.keys(db.properties).some(prop => 
+                prop.toLowerCase().includes('ticket') || 
+                prop.toLowerCase().includes('support') ||
+                prop.toLowerCase().includes('status') && 
+                prop.toLowerCase().includes('email')
+              )) {
+                console.log(`   👉 This database might be suitable for Support Tickets`);
+              }
               console.log('----------------------------');
             } catch (error) {
               console.error(`Error retrieving database ${block.id}:`, error);
@@ -194,6 +231,18 @@ async function listAllDatabases() {
     } catch (error) {
       console.error("Error accessing database directly:", error);
     }
+    
+    // Print a clear summary with next steps
+    console.log("\n==================================================");
+    console.log("🔍 DATABASE IDENTIFICATION SUMMARY AND NEXT STEPS");
+    console.log("==================================================");
+    console.log("Based on the results above, look for:");
+    console.log("1. Databases with 👉 indicators showing they're suitable for FAQs or Support Tickets");
+    console.log("2. Make note of the database IDs for the next step");
+    console.log("\nOnce you've identified your databases, run:");
+    console.log("node use-existing-db.js");
+    console.log("\nThis will guide you through configuring the application to use your specific databases");
+    console.log("==================================================");
     
   } catch (error) {
     console.error('Error listing databases:', error);

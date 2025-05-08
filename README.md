@@ -64,15 +64,19 @@ Add these environment variables to your project:
 
 If your Notion page already has databases:
 
-1. Run `node auto-setup.js` to automatically detect and configure them
-2. Or run `node use-existing-db.js` for a guided setup process
-3. The configuration will be automatically detected - no additional environment variables needed!
+1. Run `npx tsx list-databases.ts` to identify all available databases (titles and IDs)
+2. Run `node auto-setup.js` to automatically detect and configure them
+3. Or run `node use-existing-db.js` for a guided setup process
+4. The configuration will be automatically detected - no additional environment variables needed!
+
+> **Pro Tip:** Always start with the list-databases.ts script to identify databases that exist in your Notion page. This will give you a clear list of all available databases with their titles and IDs.
 
 ## Troubleshooting
 
 - **Content not appearing**: Check that your Notion page is shared with the integration
 - **Database connection issues**: Make sure the notion-config.json file exists in the project root
-- **Missing databases**: Use the `node use-existing-db.js` script to configure existing databases in your Notion page
+- **Missing databases**: First run `npx tsx list-databases.ts` to identify available databases, then use `node use-existing-db.js` to configure them
+- **Database identification issues**: Always start with `npx tsx list-databases.ts` to get a complete list of database titles and IDs
 
 ## About Remixing
 

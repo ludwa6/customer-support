@@ -41,7 +41,7 @@ Before you remix, make sure you have:
 
 ### 4. Set Up with the AI Assistant
 
-Once you've added your secrets, use this exact prompt with the AI assistant:
+Once you've added your secrets, use this exact prompt with the Replit Agent:
 
 ```
 I'd like to set up this Notion-powered documentation portal with my existing Notion page. I've already:
@@ -51,15 +51,28 @@ I'd like to set up this Notion-powered documentation portal with my existing Not
 3. Added my NOTION_INTEGRATION_SECRET and NOTION_PAGE_URL as secrets
 
 Please help me:
-1. Detect existing databases in my Notion page
+1. First run the list-databases.ts script to identify all databases in my Notion page
 2. Configure the application to use these databases
 3. Ensure the portal properly displays my Notion content
 ```
 
 The AI will guide you through:
-- Running the detection script to find existing databases
-- Configuring the application to use your databases
+- Running the list-databases.ts script to identify all available databases
+- Configuring the application to use these databases
 - Testing that content displays correctly
+
+### Important: Always Run list-databases.ts First
+
+The most reliable way to identify databases in your Notion page is to run:
+
+```bash
+npx tsx list-databases.ts
+```
+
+This script will:
+1. Connect to your Notion page using the provided secrets
+2. List all available databases with their titles and IDs
+3. Help you correctly identify which databases to use for FAQs and Support Tickets
 
 **Note:** Your configuration will be automatically detected and loaded from notion-config.json - no additional environment variables needed!
 
