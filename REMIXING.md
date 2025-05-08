@@ -73,25 +73,6 @@ The AI will guide you through:
 
 ### Important: Always Run list-databases.ts First
 
-### For Users Without Existing Databases
-
-If you don't already have databases set up in your Notion page, you can use our special setup script:
-
-```bash
-node setup-new-notion-db.js
-```
-
-This script will:
-1. Check your Notion page for existing databases
-2. Create new databases if none are found
-3. Configure the application to use these new databases
-4. Set up the necessary environment variables
-
-It's the perfect solution when:
-- You're starting from scratch with a brand new Notion page
-- The remixing process didn't find any existing databases
-- You want to create a fresh set of properly configured databases
-
 The most reliable way to identify databases in your Notion page is to run:
 
 ```bash

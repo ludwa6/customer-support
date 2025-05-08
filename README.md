@@ -19,9 +19,6 @@ An AI-powered customer support portal leveraging Notion databases for dynamic do
    # RECOMMENDED: Automatic database detection & configuration:
    node auto-setup.js
    
-   # For users without ANY existing databases - creates fresh databases:
-   node setup-new-notion-db.js
-   
    # Alternative: Interactive setup for new users:
    node setup.js
    
