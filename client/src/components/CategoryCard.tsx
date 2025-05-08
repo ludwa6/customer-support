@@ -63,13 +63,12 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
   return (
     <Link href={`/documentation?category=${category.id}`} className="block group">
         <div className="border border-gray-200 rounded-lg p-4 transition duration-150 ease-in-out hover:bg-gray-50 hover:border-primary">
-          <div className="flex items-center mb-2">
+          <div className="flex items-center">
             <div className="bg-primary/10 p-2 rounded-lg mr-3">
               {icon}
             </div>
             <h3 className="text-md font-medium text-text group-hover:text-primary">{category.name}</h3>
           </div>
-          <p className="text-sm text-gray-500">{category.description}</p>
         </div>
     </Link>
   );
