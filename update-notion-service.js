@@ -87,7 +87,8 @@ if (process.env.NOTION_CONFIG_PATH) {
   
   console.log('Successfully updated Notion service!');
   console.log('You can now use your existing Notion databases with the application.');
-  console.log('Make sure to add the NOTION_CONFIG_PATH environment variable to point to your configuration file.');
+  console.log('The application will automatically find and use the notion-config.json file.');
+  console.log('No additional environment variables are needed.');
 } catch (error) {
   console.error(`Error updating Notion service: ${error.message}`);
 }

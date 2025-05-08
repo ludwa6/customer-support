@@ -478,9 +478,9 @@ function finishSetup() {
   
   printSuccess('Configuration for using existing Notion databases is complete!');
   printInfo('\nFollow these steps to finish the setup:');
-  printInfo('1. Add NOTION_CONFIG_PATH=./notion-config.json to your environment variables');
-  printInfo('2. Run node update-notion-service.js to update the service code');
-  printInfo('3. Restart the application with npm run dev');
+  printInfo('1. Run node update-notion-service.js to update the service code');
+  printInfo('2. Restart the application with npm run dev');
+  printInfo('\nNote: The application will automatically find and use the notion-config.json file.');
   
   rl.close();
 }
