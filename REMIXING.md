@@ -50,7 +50,7 @@ Start by duplicating our pre-configured Notion template that includes all the ne
 
 ### 5. Set Up with the AI Assistant
 
-Once you've added your secrets, use this exact prompt with the Replit Agent:
+Once you've added your secrets, use this EXACT prompt with the Replit Agent. Do not modify it in any way!
 
 ```
 I'd like to set up this Notion-powered documentation portal with my Notion page. I've already:
@@ -61,10 +61,12 @@ I'd like to set up this Notion-powered documentation portal with my Notion page.
 4. Added my NOTION_INTEGRATION_SECRET and NOTION_PAGE_URL as secrets
 
 Please help me:
-1. First run the list-databases.ts script to identify all databases in my Notion page
-2. Configure the application to use these databases
+1. First run the list-databases.ts script using: npx tsx list-databases.ts
+2. Then run auto-setup.js to configure the application
 3. Ensure the portal properly displays my Notion content
 ```
+
+> ⚠️ **WARNING**: Do not change this prompt or skip the first step! The exact command `npx tsx list-databases.ts` is crucial to ensure your databases are properly detected. Many remixing issues occur because this step is skipped or modified.
 
 The AI will guide you through:
 - Running the list-databases.ts script to identify all available databases
@@ -100,6 +102,22 @@ The application requires specific databases to function properly:
 
 For proper functionality, make sure your Notion page contains both a FAQs database and a Support Tickets database. The application will validate their schemas and configure itself based on what it finds.
 
+## Alternative: Dedicated Remix Setup Script
+
+If you're having trouble with the AI setup process, you can use our dedicated remix setup script:
+
+```bash
+node setup-remix.js
+```
+
+This special script:
+1. Automatically checks your Notion integration secrets
+2. **ALWAYS** runs list-databases.ts first to find existing databases
+3. Runs auto-setup.js to configure the application
+4. Provides clear success/error messages for each step
+
+This is the most reliable way to set up your remixed project as it ensures the database detection happens first.
+
 ## Troubleshooting
 
 If you run into issues during setup:
@@ -109,7 +127,7 @@ If you run into issues during setup:
 - **Schema validation errors**: Check that your databases contain the required properties (Title, Description, Status, etc.)
 - **Missing Support Tickets functionality**: Make sure you've configured both the FAQs and Support Tickets databases
 - **Status field warnings**: The application now accepts any status values in your Support Tickets database
-- **Configuration issues**: Run `node use-existing-db.js` manually for a guided setup
+- **Configuration issues**: Run `node setup-remix.js` for the dedicated remix setup script
 
 ## Customizing the AI Chatbot
 

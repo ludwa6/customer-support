@@ -38,8 +38,12 @@ If you're remixing this project, please follow these steps to ensure proper data
 1. Set up your Notion integration
 2. Connect your page to the integration
 3. Add `NOTION_INTEGRATION_SECRET` and `NOTION_PAGE_URL` to your secrets
-4. **IMPORTANT:** Run `npx tsx list-databases.ts` to identify your databases
-5. Run `node auto-setup.js` to configure the application
+4. Run our dedicated remix setup script:
+   ```bash
+   node setup-remix.js
+   ```
+
+This script automatically runs list-databases.ts first and then configures your application. It's the most reliable way to set up a remixed project.
 
 For detailed remix instructions, see [REMIXING.md](REMIXING.md).
 

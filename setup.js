@@ -245,9 +245,9 @@ function confirmSetup(secret, pageUrl) {
 
 // Step 7: Run Setup Script
 async function runSetupScript(secret, pageUrl) {
-  printInfo('\nRunning setup script...');
+  printInfo('\nChecking for existing databases first...');
   
-  // Run the setup script with environment variables
+  // Environment variables for all commands
   const env = { 
     ...process.env, 
     NOTION_INTEGRATION_SECRET: secret, 
@@ -255,6 +255,40 @@ async function runSetupScript(secret, pageUrl) {
   };
   
   try {
+    // STEP 1: First run list-databases.ts to identify any existing databases
+    printInfo('\n📋 Running database detection script...');
+    try {
+      const { stdout: listOutput, stderr: listErr } = await exec('npx tsx list-databases.ts', { env });
+      if (listErr) {
+        console.error('Warning during database detection:', listErr);
+      }
+      console.log(listOutput);
+      
+      if (listOutput.includes('Database:') || listOutput.includes('database with ID:')) {
+        printSuccess('Found existing databases in your Notion page!');
+        
+        // Check if we should use existing databases
+        const useExistingQ = new Promise((resolve) => {
+          rl.question('\nWould you like to use these existing databases? (y/n): ', answer => {
+            resolve(answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes');
+          });
+        });
+        
+        if (await useExistingQ) {
+          printInfo('\nRunning auto-setup to configure existing databases...');
+          const { stdout: autoSetupOutput } = await exec('node auto-setup.js', { env });
+          console.log(autoSetupOutput);
+          printSuccess('Configuration complete!');
+          return finishSetup();
+        }
+      }
+    } catch (listError) {
+      printWarning('Could not detect existing databases. Will create new ones.');
+      console.error('Error details:', listError.message);
+    }
+    
+    // STEP 2: If we get here, run the setup script to create new databases
+    printInfo('\n📝 Running setup script to create new databases...');
     const { stdout, stderr } = await exec('tsx server/setup-notion.ts', { env });
     
     if (stderr) {
