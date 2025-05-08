@@ -101,6 +101,33 @@ If you run into issues during setup:
 - **Status field warnings**: The application now accepts any status values in your Support Tickets database
 - **Configuration issues**: Run `node use-existing-db.js` manually for a guided setup
 
+## Customizing the AI Chatbot
+
+Once you've set up your project with your Notion content, you might want to customize the AI chatbot to better represent your brand and specific needs. Use this prompt with the Replit Agent:
+
+```
+I want to customize the AI Chatbot in my remixed SerenityFlow Documentation Portal. Can you help me with the following:
+
+1. Open the file at server/services/openai.ts and modify the systemMessage to match my brand. I want the AI to:
+   - Represent [MY COMPANY NAME: {insert company name}]
+   - Help with questions about [MY PRODUCT/SERVICE: {insert product/service}]
+   - Use a [TONE: professional/casual/friendly/technical] tone
+   - Have expertise in [DOMAIN: {insert domain}]
+
+2. Then update the welcome message in client/src/components/ChatAssistant.tsx to:
+   "👋 Hi there! I'm your {insert company name} assistant. I can help with {specific things the assistant can help with}. How can I help you today?"
+
+3. Also change the chat button text to say "Chat with {insert name} Support" 
+
+4. If possible, I'd also like to customize the AI model parameters, such as:
+   - Adjust the temperature to [VALUE: 0.0-1.0] to make responses more/less creative
+   - Change the max_tokens to [VALUE: 100-1000] to adjust response length
+
+Please make these changes while preserving all the existing functionality. After you're done, restart the application so I can see my customized AI Assistant in action.
+```
+
+Remember to replace the values in curly braces `{}` with your specific information before submitting the prompt to the Replit Agent.
+
 ## Getting Help
 
 If you need additional assistance, ask the AI assistant using a clear description of what you're trying to accomplish and where you're stuck.
