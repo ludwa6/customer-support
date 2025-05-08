@@ -13,10 +13,10 @@ let databaseConfig = {
   }
 };
 
-// Check if a configuration file path is specified
-if (process.env.NOTION_CONFIG_PATH) {
+// Check if a configuration file exists
+const configPath = './notion-config.json';
+if (fs.existsSync(configPath)) {
   try {
-    const configPath = process.env.NOTION_CONFIG_PATH;
     console.log(`Loading Notion database configuration from ${configPath}`);
     
     // Load the configuration file
@@ -127,16 +127,17 @@ export async function getSupportTicketsDatabase() {
         console.log(`Using first available database for tickets: ${firstDb.id}`);
         
         // Save this database ID in configuration for future use
-        if (process.env.NOTION_CONFIG_PATH) {
+        const localConfigPath = './notion-config.json';
+        if (fs.existsSync(localConfigPath)) {
           try {
-            const configData = fs.readFileSync(process.env.NOTION_CONFIG_PATH, 'utf8');
+            const configData = fs.readFileSync(localConfigPath, 'utf8');
             const config = JSON.parse(configData);
             
             // Store the found database ID
             config.databases = config.databases || {};
             config.databases.supportTickets = firstDb.id;
             
-            fs.writeFileSync(process.env.NOTION_CONFIG_PATH, JSON.stringify(config, null, 2));
+            fs.writeFileSync(localConfigPath, JSON.stringify(config, null, 2));
             console.log(`Saved database ID ${firstDb.id} to configuration file`);
           } catch (error) {
             console.error("Error updating configuration file:", error);

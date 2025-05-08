@@ -13,19 +13,14 @@ let databaseConfig = {
   }
 };
 
-// Check if a configuration file path is specified
-if (process.env.NOTION_CONFIG_PATH) {
+// Check if a configuration file exists
+const configPath = './notion-config.json';
+if (fs.existsSync(configPath)) {
   try {
-    const configPath = process.env.NOTION_CONFIG_PATH;
     console.log(`Loading Notion database configuration from ${configPath}`);
     
-    // Resolve relative path if needed
-    const resolvedPath = configPath.startsWith('./')
-      ? require('path').resolve(process.cwd(), configPath.slice(2))
-      : configPath;
-    
     // Load the configuration file
-    const configData = fs.readFileSync(resolvedPath, 'utf8');
+    const configData = fs.readFileSync(configPath, 'utf8');
     const parsedConfig = JSON.parse(configData);
     
     // Make sure we have a proper structure
