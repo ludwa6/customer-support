@@ -129,10 +129,6 @@ I want to customize the AI Chatbot in my remixed SerenityFlow Documentation Port
 
 3. Also change the chat button text to say "Chat with {insert name} Support" 
 
-4. I'd also like to customize the AI model parameters in server/services/openai.ts:
-   - Adjust the temperature to [VALUE: 0.0-1.0] (higher for more creative responses)
-   - Change the max_tokens to [VALUE: 100-1000] to adjust response length
-
 Please make these changes while preserving all the existing functionality. After you're done, restart the application so I can see my customized AI Assistant in action.
 ```
 
