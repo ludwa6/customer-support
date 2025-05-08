@@ -8,22 +8,40 @@ An AI-powered customer support portal leveraging Notion databases for dynamic do
    - `NOTION_INTEGRATION_SECRET`
    - `NOTION_PAGE_URL`
 
-2. Run one of these setup commands:
+2. **Identify databases in your Notion page** (important when remixing!):
+   ```bash
+   # First, check what databases exist in your Notion page:
+   npx tsx list-databases.ts
    ```
-   # Interactive setup for new users:
-   node setup.js
-   
-   # Automatic database detection & configuration:
+
+3. Run one of these setup commands:
+   ```bash
+   # RECOMMENDED: Automatic database detection & configuration:
    node auto-setup.js
    
-   # Use existing databases in your Notion page:
+   # Alternative: Interactive setup for new users:
+   node setup.js
+   
+   # Alternative: Use existing databases in your Notion page:
    node use-existing-db.js
    ```
 
-3. Start the application:
-   ```
+4. Start the application:
+   ```bash
    npm run dev
    ```
+
+## Remixing This Project
+
+If you're remixing this project, please follow these steps to ensure proper database connection:
+
+1. Set up your Notion integration
+2. Connect your page to the integration
+3. Add `NOTION_INTEGRATION_SECRET` and `NOTION_PAGE_URL` to your secrets
+4. **IMPORTANT:** Run `npx tsx list-databases.ts` to identify your databases
+5. Run `node auto-setup.js` to configure the application
+
+For detailed remix instructions, see [REMIXING.md](REMIXING.md).
 
 ## Features
 

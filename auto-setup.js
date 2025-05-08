@@ -117,6 +117,12 @@ async function runAutoSetup() {
     // Force detection even if we already have a flag
     printStep('Checking for databases in your Notion page...');
     try {
+      // First try with list-databases.ts for more reliable detection
+      printInfo('Running enhanced database detection script...');
+      await runCommand('npx tsx list-databases.ts');
+      
+      // Then run the regular detection script which creates the config file
+      printInfo('Configuring detected databases...');
       await runCommand('node server/detect-notion-db.js');
       
       // If detection created or updated the config, it means databases were found

@@ -39,20 +39,23 @@ async function detectDatabases() {
     const pageId = extractPageIdFromUrl(NOTION_PAGE_URL);
     console.log(`Checking Notion page ${pageId} for existing databases...`);
     
-    // List all blocks (including databases) in the page
+    // Array to store all found databases
+    let allDatabases = [];
+    
+    // METHOD 1: List all blocks (including databases) in the page
     const response = await notion.blocks.children.list({
       block_id: pageId
     });
     
     // Filter for databases
-    const databases = response.results.filter(block => block.type === 'child_database');
+    const childDatabases = response.results.filter(block => block.type === 'child_database');
     
-    if (databases.length > 0) {
-      console.log(`Found ${databases.length} existing database(s) in your Notion page.`);
+    if (childDatabases.length > 0) {
+      console.log(`Found ${childDatabases.length} child database(s) directly in your Notion page.`);
       
       // Get database info
-      const databasesInfo = await Promise.all(
-        databases.map(async db => {
+      const childDatabasesInfo = await Promise.all(
+        childDatabases.map(async db => {
           const info = await notion.databases.retrieve({ database_id: db.id });
           let title = '';
           if (info.title && info.title.length > 0) {
@@ -62,9 +65,61 @@ async function detectDatabases() {
         })
       );
       
+      allDatabases = [...childDatabasesInfo];
+    } else {
+      console.log("No child databases found directly on the page. Trying search method...");
+    }
+    
+    // METHOD 2: Try to find databases using search API
+    try {
+      const searchResponse = await notion.search({
+        filter: {
+          property: "object",
+          value: "database"
+        }
+      });
+      
+      if (searchResponse.results.length > 0) {
+        console.log(`Found ${searchResponse.results.length} database(s) via search API.`);
+        
+        // Get detailed info for each database found via search
+        const searchDatabasesInfo = await Promise.all(
+          searchResponse.results.map(async db => {
+            let title = 'Untitled Database';
+            if (db.title && db.title.length > 0) {
+              title = db.title[0]?.plain_text || 'Untitled Database';
+            }
+            
+            // Get properties
+            const properties = Object.keys(db.properties || {});
+            
+            return { 
+              id: db.id, 
+              title: title, 
+              properties: properties 
+            };
+          })
+        );
+        
+        // Add databases found via search to our collection
+        // Only add those that aren't already in the list
+        searchDatabasesInfo.forEach(searchDb => {
+          if (!allDatabases.some(db => db.id === searchDb.id)) {
+            allDatabases.push(searchDb);
+          }
+        });
+      }
+    } catch (searchError) {
+      console.log("Search method error:", searchError.message);
+    }
+    
+    // If we found databases by either method
+    if (allDatabases.length > 0) {
+      console.log(`Total of ${allDatabases.length} database(s) found.`);
+      
       // Display found databases
       console.log('\nExisting databases:');
-      databasesInfo.forEach(db => {
+      allDatabases.forEach(db => {
         console.log(`- ${db.title} (ID: ${db.id})`);
         console.log(`  Properties: ${db.properties.join(', ')}`);
       });
@@ -80,7 +135,7 @@ async function detectDatabases() {
       };
       
       // Automatically map databases by title
-      for (const db of databasesInfo) {
+      for (const db of allDatabases) {
         const dbTitle = db.title.toLowerCase();
         
         if (dbTitle.includes('category') || dbTitle.includes('categories')) {
@@ -115,8 +170,8 @@ async function detectDatabases() {
       // Create a flag file to indicate existing databases were found
       fs.writeFileSync('.notion-db-exists', JSON.stringify({ 
         timestamp: new Date().toISOString(),
-        databaseCount: databases.length,
-        databaseIds: databasesInfo.map(db => ({ id: db.id, title: db.title }))
+        databaseCount: allDatabases.length,
+        databaseIds: allDatabases.map(db => ({ id: db.id, title: db.title }))
       }));
       
       return true;
