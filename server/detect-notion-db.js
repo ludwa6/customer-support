@@ -160,8 +160,8 @@ async function detectDatabases() {
       if (config.databases.categories || config.databases.articles || config.databases.faqs || config.databases.supportTickets) {
         fs.writeFileSync('notion-config.json', JSON.stringify(config, null, 2));
         console.log('\nCreated basic configuration file: notion-config.json');
-        console.log('To use these databases, add this environment variable in your .env file or Replit Secrets:');
-        console.log('NOTION_CONFIG_PATH=./notion-config.json');
+        console.log('The application will automatically find and use this file.');
+        console.log('NO ADDITIONAL ENVIRONMENT VARIABLES NEEDED!');
       } else {
         console.log('\nTo use these existing databases with a custom mapping, run:');
         console.log('node use-existing-db.js');

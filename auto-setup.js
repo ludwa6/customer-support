@@ -169,13 +169,8 @@ async function runAutoSetup() {
   // REGULAR SETUP FLOW (not a remix)
   if (fs.existsSync(configFile)) {
     printSuccess('Configuration file exists');
-    
-    // Set NOTION_CONFIG_PATH if not already set
-    if (!process.env.NOTION_CONFIG_PATH) {
-      console.log('Setting NOTION_CONFIG_PATH environment variable');
-      process.env.NOTION_CONFIG_PATH = './' + configFile;
-    }
-    
+    printInfo('The application will automatically find and use the notion-config.json file');
+    printInfo('No additional environment variables are needed!');
     printInfo('Your application is already configured to use Notion databases');
     printInfo('You can start it with: npm run dev');
     return;
@@ -193,9 +188,8 @@ async function runAutoSetup() {
       printSuccess('Automatically configured Notion databases');
       printInfo('Configuration file created: notion-config.json');
       
-      // Set environment variable
-      process.env.NOTION_CONFIG_PATH = './' + configFile;
-      printInfo('Set NOTION_CONFIG_PATH to ./notion-config.json');
+      // No need to set environment variable anymore
+      printInfo('The application will automatically find and use the notion-config.json file');
       
       // Add reassurance that no additional configuration is needed
       printInfo('\nIMPORTANT: The application will automatically find and use the notion-config.json file.');

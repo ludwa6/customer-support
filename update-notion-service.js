@@ -26,10 +26,10 @@ let databaseConfig = {
   }
 };
 
-// Check if a configuration file path is specified
-if (process.env.NOTION_CONFIG_PATH) {
+// Check if a configuration file exists
+const configPath = './notion-config.json';
+if (fs.existsSync(configPath)) {
   try {
-    const configPath = process.env.NOTION_CONFIG_PATH;
     console.log(\`Loading Notion database configuration from \${configPath}\`);
     
     // Load the configuration file
@@ -37,9 +37,10 @@ if (process.env.NOTION_CONFIG_PATH) {
     databaseConfig = JSON.parse(configData);
     
     console.log('Successfully loaded database configuration:');
-    console.log(\`- Categories database: \${databaseConfig.databases.categories}\`);
-    console.log(\`- Articles database: \${databaseConfig.databases.articles}\`);
-    console.log(\`- FAQs database: \${databaseConfig.databases.faqs}\`);
+    console.log(\`- Categories database: \${databaseConfig.databases.categories || 'Not configured'}\`);
+    console.log(\`- Articles database: \${databaseConfig.databases.articles || 'Not configured'}\`);
+    console.log(\`- FAQs database: \${databaseConfig.databases.faqs || 'Not configured'}\`);
+    console.log(\`- Support Tickets database: \${databaseConfig.databases.supportTickets || 'Not configured'}\`);
   } catch (error) {
     console.error(\`Error loading Notion configuration file: \${error.message}\`);
   }
