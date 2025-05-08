@@ -64,7 +64,7 @@ If your Notion page already has databases:
 
 1. Run `node auto-setup.js` to automatically detect and configure them
 2. Or run `node use-existing-db.js` for a guided setup process
-3. Add the environment variable `NOTION_CONFIG_PATH=./notion-config.json`
+3. The configuration will be automatically detected - no additional environment variables needed!
 
 ## Troubleshooting
 
