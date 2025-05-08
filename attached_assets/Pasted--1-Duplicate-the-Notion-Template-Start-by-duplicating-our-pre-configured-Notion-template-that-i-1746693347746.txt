@@ -1,0 +1,55 @@
+### 1. Duplicate the Notion Template
+
+Start by duplicating our pre-configured Notion template that includes all the necessary databases:
+
+1. Go to the template page: [Customer Support Admin TEMPLATE](https://www.notion.so/Customer-Support-Admin-TEMPLATE-1ebc922b6d5b808e827ae3f3ab4fbe43?pvs=21)
+2. Click "Duplicate" in the top-right corner
+3. Select the workspace where you want to save the template
+4. Once duplicated, this page will contain all the required databases already structured correctly
+
+### **2. Create a Notion Integration**
+
+1. Go to the [Notion integrations page](https://www.notion.so/my-integrations)
+2. Click "New integration"
+3. Name your integration (e.g., "Customer Portal")
+4. Select the workspace where you want to use it
+5. Click "Submit"
+6. Copy the "Internal Integration Secret"
+
+> Important: We recommend creating a dedicated integration specifically for this project rather than reusing an existing one. This helps avoid conflicts and makes it easier to identify the correct databases during the setup process.
+> 
+
+### **Step 3: Share a Notion Page**
+
+1. Click the "..." menu in the top right of the notion page
+2. Select "Add connections"
+3. Find and select your integration
+
+### Step 4: Get OpenAI API Key (for AI Assistant capatabilieis)
+
+1. Go to https://platform.openai.com/
+2. Create new API key
+
+### **Step 5: Remix Replit App (front-end)**
+
+1. Remix this template  https://replit.com/@mannybernabe/Customer-Support-Page-with-Notion?v=1
+2. Insert your new secrets: NOTION_INTEGRATION_SECRET, NOTION_PAGE_URL, OPENAI_API_KEY
+
+### **Step 6: Work with Agent to Configure you Databases**
+
+1. Once the apps has been Remixed and you’ve add your secrets, prompt the agent with the below prompt to get started:
+
+```markdown
+I'd like to set up this Notion-powered documentation portal with my existing Notion page. I've already:
+
+1. Created a Notion integration at https://www.notion.so/my-integrations
+2. Shared a Notion page with this integration
+3. Added my NOTION_INTEGRATION_SECRET and NOTION_PAGE_URL as secrets
+
+Please help me:
+1. Detect existing databases in my Notion page
+2. Configure the application to use these databases
+3. Ensure the portal properly displays my Notion content
+```
+
+### **Step 6: Work with Agent to Configure your AI Assistant**
