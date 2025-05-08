@@ -243,7 +243,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         notionIntegrationConfigured: !!process.env.NOTION_INTEGRATION_SECRET,
         notionPageConfigured: !!process.env.NOTION_PAGE_URL,
-        notionConfigPathConfigured: !!process.env.NOTION_CONFIG_PATH,
+        configFileExists: configExists, // We're using this instead of NOTION_CONFIG_PATH
         databasesDetected,
         configExists,
         preventSetupExists

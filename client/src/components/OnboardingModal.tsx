@@ -177,7 +177,7 @@ export function OnboardingModal() {
                       <p>
                         {databasesDetected
                           ? "Run 'node auto-setup.js' to configure existing databases."
-                          : "After creating databases, add NOTION_CONFIG_PATH=./notion-config.json to your environment variables."}
+                          : "After creating databases, run 'node auto-setup.js' to configure them. No additional environment variables needed!"}
                       </p>
                     </div>
                   )}
