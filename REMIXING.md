@@ -59,26 +59,27 @@ The AI will guide you through:
 - Configuring the application to use your databases
 - Testing that content displays correctly
 
-## Database Adaptability
+## Database Requirements
 
-The application is highly adaptable and will work with whatever databases exist in your Notion page. The main databases it uses are:
+The application requires specific databases to function properly:
 
-- A database for FAQs (the main content type)
-- A database for support tickets (optional)
+- A database for FAQs (main content type)
+- A database for Support Tickets (required for ticket management)
 
 **Important Notes:**
 - You don't need a dedicated Categories database - the application can extract category information from any database with select-type properties (like dropdown fields)
 - The application previously used an Articles database, but that functionality has been merged with FAQs
-- Even databases with different names will work - the system will detect them and adapt accordingly
+- Databases with different names will work as long as they have compatible schemas - the system will detect and adapt to them
 
-For the best experience, make sure your Notion page contains at least one database with some content. The application will intelligently configure itself based on whatever it finds available.
+For proper functionality, make sure your Notion page contains both a FAQs database and a Support Tickets database. The application will validate their schemas and configure itself based on what it finds.
 
 ## Troubleshooting
 
 If you run into issues during setup:
 
-- **No databases detected**: Add at least one database to your Notion page and try again
-- **Content not appearing**: Ensure your page is properly shared with the integration
+- **Missing required databases**: Ensure you have both a FAQs database and a Support Tickets database in your Notion page
+- **Content not appearing**: Verify your page is properly shared with the integration
+- **Schema validation errors**: Check that your databases contain the required properties (Title, Description, Status, etc.)
 - **Configuration issues**: Run `node use-existing-db.js` manually for a guided setup
 
 ## Getting Help

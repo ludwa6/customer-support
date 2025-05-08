@@ -93,7 +93,7 @@ The app includes enhanced safeguards to prevent any database creation in remixed
 
 ### Supported Database Types
 
-The system primarily uses:
+The system requires:
 - FAQs database (the main content type)
 - Support Tickets database (for ticket management)
 
@@ -101,4 +101,4 @@ The system primarily uses:
 - The application doesn't require a dedicated Categories database - it can extract categories from any database with select-type properties
 - Articles functionality has been deprecated and merged with FAQs
 
-Before remixing, make sure your Notion page contains at least one database (ideally a FAQs database). The application will only use existing databases, never creating new ones in remixed projects.
+Before remixing, make sure your Notion page contains both a FAQs database and a Support Tickets database. The application will only use existing databases, never creating new ones in remixed projects.
