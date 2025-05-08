@@ -44,6 +44,8 @@ An AI-powered customer support portal leveraging Notion databases for dynamic do
 5. Click "Submit"
 6. Copy the "Internal Integration Secret"
 
+> **Important:** We recommend creating a dedicated integration specifically for this project rather than reusing an existing one. This helps avoid conflicts and makes it easier to identify the correct databases during the setup process.
+
 ### Step 2: Share a Notion Page
 
 1. Create a new page in Notion or use an existing one

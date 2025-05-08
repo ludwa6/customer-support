@@ -21,6 +21,8 @@ Before you remix, make sure you have:
 5. Click "Submit"
 6. **Copy the "Internal Integration Secret"** - you'll need this later
 
+> **Important:** Create a dedicated integration specifically for this project instead of reusing an existing one. Using a dedicated integration helps avoid conflicts with other applications and makes it much easier to identify the correct databases during setup.
+
 ### 2. Prepare a Notion Page
 
 1. Open Notion and create a new page (or use an existing one)
@@ -44,7 +46,7 @@ Once you've added your secrets, use this exact prompt with the AI assistant:
 ```
 I'd like to set up this Notion-powered documentation portal with my existing Notion page. I've already:
 
-1. Created a Notion integration at https://www.notion.so/my-integrations
+1. Created a dedicated Notion integration at https://www.notion.so/my-integrations specifically for this project
 2. Shared a Notion page with this integration
 3. Added my NOTION_INTEGRATION_SECRET and NOTION_PAGE_URL as secrets
 
