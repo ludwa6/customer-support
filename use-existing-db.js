@@ -62,7 +62,8 @@ let config = {
   databases: {
     categories: '',
     articles: '',
-    faqs: ''
+    faqs: '',
+    supportTickets: ''
   }
 };
 
@@ -181,6 +182,7 @@ function mapDatabases(notion, databasesInfo) {
   printInfo('1. Categories database - Stores category information');
   printInfo('2. Articles database - Stores documentation articles');
   printInfo('3. FAQs database - Stores frequently asked questions');
+  printInfo('4. Support Tickets database - Stores customer support tickets');
   
   mapCategoriesDatabase(notion, databasesInfo, 0);
 }
@@ -339,10 +341,64 @@ function mapFAQsDatabase(notion, databasesInfo, attempt) {
       }
       
       printSuccess(`FAQs database set to: ${selectedDb.title}`);
-      saveConfiguration();
+      mapSupportTicketsDatabase(notion, databasesInfo, 0);
     } catch (error) {
       printError(`Error validating database: ${error.message}`);
       mapFAQsDatabase(notion, databasesInfo, attempt + 1);
+    }
+  });
+}
+
+// Map Support Tickets database
+function mapSupportTicketsDatabase(notion, databasesInfo, attempt) {
+  if (attempt > 2) {
+    printError('Too many failed attempts. Please make sure your databases have the required properties.');
+    rl.close();
+    return;
+  }
+  
+  printSubStep('Select your Support Tickets database:');
+  rl.question('Enter the number of the database to use for Support Tickets: ', async (answer) => {
+    const index = parseInt(answer) - 1;
+    
+    if (isNaN(index) || index < 0 || index >= databasesInfo.length) {
+      printError('Invalid selection. Please enter a valid number.');
+      mapSupportTicketsDatabase(notion, databasesInfo, attempt + 1);
+      return;
+    }
+    
+    const selectedDb = databasesInfo[index];
+    config.databases.supportTickets = selectedDb.id;
+    
+    // Validate database properties
+    try {
+      const dbInfo = await notion.databases.retrieve({ database_id: selectedDb.id });
+      const properties = dbInfo.properties;
+      
+      const requiredProps = ['full_name', 'email', 'description', 'status', 'submission_date'];
+      const missingProps = requiredProps.filter(prop => 
+        !Object.keys(properties).some(p => p.toLowerCase() === prop.toLowerCase())
+      );
+      
+      if (missingProps.length > 0) {
+        printError(`The selected database is missing required properties: ${missingProps.join(', ')}`);
+        printInfo('Do you want to continue anyway? The application might not work correctly.');
+        rl.question('Continue? (y/n): ', (answer) => {
+          if (answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes') {
+            printSuccess(`Support Tickets database set to: ${selectedDb.title}`);
+            saveConfiguration();
+          } else {
+            mapSupportTicketsDatabase(notion, databasesInfo, attempt + 1);
+          }
+        });
+        return;
+      }
+      
+      printSuccess(`Support Tickets database set to: ${selectedDb.title}`);
+      saveConfiguration();
+    } catch (error) {
+      printError(`Error validating database: ${error.message}`);
+      mapSupportTicketsDatabase(notion, databasesInfo, attempt + 1);
     }
   });
 }
@@ -397,7 +453,8 @@ let databaseConfig = {
   databases: {
     categories: null,
     articles: null,
-    faqs: null
+    faqs: null,
+    supportTickets: null
   }
 };
 
@@ -415,6 +472,7 @@ if (fs.existsSync(configPath)) {
     console.log(\\\`- Categories database: \\\${databaseConfig.databases.categories}\\\`);
     console.log(\\\`- Articles database: \\\${databaseConfig.databases.articles}\\\`);
     console.log(\\\`- FAQs database: \\\${databaseConfig.databases.faqs}\\\`);
+    console.log(\\\`- Support Tickets database: \\\${databaseConfig.databases.supportTickets}\\\`);
   } catch (error) {
     console.error(\\\`Error loading Notion configuration file: \\\${error.message}\\\`);
   }
