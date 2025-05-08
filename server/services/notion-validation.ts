@@ -98,7 +98,8 @@ export async function validateDatabaseSchema(
     }
     
     // Check required property types
-    for (const [type, requiredProps] of requiredPropertyTypes.entries()) {
+    // Convert Map.entries() to an array to avoid TypeScript downlevelIteration error
+    Array.from(requiredPropertyTypes.entries()).forEach(([type, requiredProps]) => {
       if (requiredProps.length > 0) {
         // We need at least one property of this type
         const dbProps = dbPropertyTypes.get(type) || [];
@@ -155,7 +156,7 @@ export async function validateDatabaseSchema(
           }
         }
       }
-    }
+    });
 
     // Validate property types and options for existing properties
     for (const [propName, propConfig] of Object.entries(schema.propertyTypes)) {

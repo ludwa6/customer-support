@@ -69,7 +69,7 @@ If your Notion page already has databases:
 ## Troubleshooting
 
 - **Content not appearing**: Check that your Notion page is shared with the integration
-- **Database connection issues**: Verify that the `NOTION_CONFIG_PATH` environment variable is set correctly
+- **Database connection issues**: Make sure the notion-config.json file exists in the project root
 - **Missing databases**: Use the `node use-existing-db.js` script to configure existing databases in your Notion page
 
 ## About Remixing

@@ -59,6 +59,8 @@ The AI will guide you through:
 - Configuring the application to use your databases
 - Testing that content displays correctly
 
+**Note:** Your configuration will be automatically detected and loaded from notion-config.json - no additional environment variables needed!
+
 ## Database Requirements
 
 The application requires specific databases to function properly:
@@ -80,6 +82,8 @@ If you run into issues during setup:
 - **Missing required databases**: Ensure you have both a FAQs database and a Support Tickets database in your Notion page
 - **Content not appearing**: Verify your page is properly shared with the integration
 - **Schema validation errors**: Check that your databases contain the required properties (Title, Description, Status, etc.)
+- **Missing Support Tickets functionality**: Make sure you've configured both the FAQs and Support Tickets databases
+- **Status field warnings**: The application now accepts any status values in your Support Tickets database
 - **Configuration issues**: Run `node use-existing-db.js` manually for a guided setup
 
 ## Getting Help
