@@ -10,10 +10,10 @@
  * in their Notion page and prompt them to use those instead of creating new ones.
  */
 
-const readline = require('readline');
-const { Client } = require('@notionhq/client');
-const fs = require('fs');
-const path = require('path');
+import readline from 'readline';
+import { Client } from '@notionhq/client';
+import fs from 'fs';
+import path from 'path';
 
 // Create readline interface
 const rl = readline.createInterface({
@@ -357,14 +357,11 @@ function saveConfiguration() {
     fs.writeFileSync('notion-config.json', configJson);
     printSuccess('Configuration saved to notion-config.json');
     
-    // Update environment with a new variable
-    printInfo('\nTo use these existing databases, you need to add a new environment variable:');
-    printInfo('NOTION_CONFIG_PATH=./notion-config.json');
-    printInfo('\nIn Replit, click the lock icon 🔒 and add this as a new secret.');
+    // Configuration is now auto-detected
+    printInfo('\nThe configuration has been saved and will be automatically detected by the application.');
+    printInfo('No additional environment variables are needed!');
     
-    printInfo('\nYou\'ll also need to modify the services/notion.ts file to load this configuration.');
-    printInfo('Run the following command to do this automatically:');
-    printInfo('node update-notion-service.js');
+    printInfo('\nYou can now restart your application to use these existing databases.');
     
     finishSetup();
   } catch (error) {
@@ -382,8 +379,8 @@ function createUpdateScript() {
  * Script to update the notion service to use existing databases
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 const notionServicePath = 'server/services/notion.ts';
 
