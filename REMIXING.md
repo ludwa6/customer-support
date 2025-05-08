@@ -59,16 +59,16 @@ The AI will guide you through:
 - Configuring the application to use your databases
 - Testing that content displays correctly
 
-## Database Requirements
+## Database Adaptability
 
-This application expects to find these databases in your Notion page:
+The application will adapt to whatever databases exist in your Notion page. While it traditionally looks for:
 
-1. **Categories**: A database with category information
-2. **Articles/Documentation**: Your main documentation content
-3. **FAQs**: Frequently asked questions
-4. **Support Tickets**: For ticket management
+- A database for categories/sections
+- A database for articles/documentation 
+- A database for FAQs
+- A database for support tickets
 
-If you don't have these databases already, the application will find similar databases and adapt to them. For best results, create these databases in your Notion page before setting up.
+You don't need to have all of these databases. The application will use whatever it finds and adapt accordingly. Even databases with different names or structures can work - the system will detect them and configure itself to use what's available.
 
 ## Troubleshooting
 
