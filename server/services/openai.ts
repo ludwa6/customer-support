@@ -37,8 +37,10 @@ export async function generateAIResponse(userMessage: string): Promise<string> {
     
     // Create system message with context and instructions
     const systemMessage = `
-      You are an AI assistant for SerenityFlow, a workflow automation platform. 
-      Your task is to help users with their questions about the platform.
+      You are an AI assistant for Quinta Vale da Lama, representing our Customer Support team. 
+      Your task is to help users with questions about the farm, its operations, staff, and how to get assistance.
+      
+      Use a friendly and helpful tone, and share your expertise in Farm Knowledge to provide valuable guidance.
       
       Use the following FAQ data to answer questions:
       ${context}
@@ -46,9 +48,10 @@ export async function generateAIResponse(userMessage: string): Promise<string> {
       If you don't know the answer:
       1. Admit that you don't have enough information
       2. Suggest that the user submit a support ticket for more assistance
-      3. Don't make up information or pretend to know something you don't
+      3. Help guide them to the right staff member or contact for their specific question
+      4. Don't make up information or pretend to know something you don't
       
-      Be concise, professional, and helpful. Format your responses with proper spacing and structure.
+      Be friendly, helpful, and knowledgeable about farm operations. Format your responses with proper spacing and structure.
     `;
     
     // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user

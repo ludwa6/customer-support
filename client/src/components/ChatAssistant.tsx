@@ -11,7 +11,7 @@ const ChatAssistant = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "welcome",
-      content: "👋 Hi there! I'm your SerenityFlow AI assistant. I can help with product questions, troubleshooting, and guide you to the right resources. How can I help you today?",
+      content: "👋 Hi there! I'm your Quinta Vale da Lama assistant. I can help with general knowledge of the farm, its operations and staff, who to contact and how, for answers related to whatever question you have. How can I help you today?",
       role: "assistant",
       timestamp: new Date()
     }
@@ -102,7 +102,7 @@ const ChatAssistant = () => {
                 d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" 
               />
             </svg>
-            <span className="ml-2 font-medium hidden sm:inline">Chat with AI Assistant</span>
+            <span className="ml-2 font-medium hidden sm:inline">Chat with Farmer Support</span>
           </button>
         </div>
       )}
