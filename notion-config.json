@@ -2,7 +2,7 @@
   "databases": {
     "categories": null,
     "articles": null,
-    "faqs": null,
+    "faqs": "204c8d56-fc2a-81e3-9311-dcab5f9423f8",
     "supportTickets": "204c8d56-fc2a-815a-9aef-f1be063d384b"
   }
 }
