@@ -22,7 +22,7 @@ const Footer = () => {
                 />
               </svg>
             </div>
-            <span className="text-sm text-gray-500">© {new Date().getFullYear()} SerenityFlow. All rights reserved.</span>
+            <span className="text-sm text-gray-500">© {new Date().getFullYear()} Quinta Vale da Lama. All rights reserved.</span>
           </div>
           <div className="flex space-x-6">
             <Link href="/privacy" className="text-sm text-gray-500 hover:text-primary">

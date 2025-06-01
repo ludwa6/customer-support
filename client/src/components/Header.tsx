@@ -40,7 +40,7 @@ const Header = () => {
                   />
                 </svg>
               </div>
-              <span className="text-xl font-semibold text-text">SerenityFlow</span>
+              <span className="text-xl font-semibold text-text">Quinta Vale da Lama</span>
               <span className="ml-2 text-sm text-gray-500">Support Portal</span>
           </Link>
         </div>
