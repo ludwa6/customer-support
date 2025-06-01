@@ -42,7 +42,7 @@ const FAQSection = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold text-text mb-2">Frequently Asked Questions</h2>
-          <p className="text-gray-500">Find answers to common questions about SerenityFlow</p>
+          <p className="text-gray-500">Find answers to common questions about Quinta Vale da Lama</p>
         </div>
         <div className="mt-4 md:mt-0 w-full md:w-auto">
           <Select value={selectedCategory} onValueChange={handleCategoryChange}>

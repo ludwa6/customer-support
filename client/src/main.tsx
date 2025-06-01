@@ -13,17 +13,17 @@ document.head.appendChild(metaDescription);
 
 // Add Open Graph tags
 const ogTitle = document.createElement("meta");
-ogTitle.property = "og:title";
+ogTitle.setAttribute("property", "og:title");
 ogTitle.content = "Quinta Vale da Lama Support Portal";
 document.head.appendChild(ogTitle);
 
 const ogDescription = document.createElement("meta");
-ogDescription.property = "og:description";
+ogDescription.setAttribute("property", "og:description");
 ogDescription.content = "Get help with Quinta Vale da Lama through our AI-powered support portal.";
 document.head.appendChild(ogDescription);
 
 const ogType = document.createElement("meta");
-ogType.property = "og:type";
+ogType.setAttribute("property", "og:type");
 ogType.content = "website";
 document.head.appendChild(ogType);
 

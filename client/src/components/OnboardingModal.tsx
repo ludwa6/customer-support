@@ -53,7 +53,7 @@ export function OnboardingModal() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Welcome to SerenityFlow Documentation Portal</DialogTitle>
+          <DialogTitle>Welcome to Quinta Vale da Lama Documentation Portal</DialogTitle>
           <DialogDescription>
             Let's get your Notion integration set up for a seamless experience.
           </DialogDescription>
@@ -63,7 +63,7 @@ export function OnboardingModal() {
           <div className="py-4">
             <h3 className="text-lg font-medium mb-2">Step 1: Notion Integration</h3>
             <p className="mb-4">
-              SerenityFlow uses Notion as a database to store your documentation and support tickets.
+              Quinta Vale da Lama uses Notion as a database to store your documentation and support tickets.
             </p>
             <div className="rounded-md bg-muted p-4">
               <div className="flex">
@@ -119,7 +119,7 @@ export function OnboardingModal() {
           <div className="py-4">
             <h3 className="text-lg font-medium mb-2">Step 2: Database Detection</h3>
             <p className="mb-4">
-              SerenityFlow can work with existing databases in your Notion page
+              Quinta Vale da Lama can work with existing databases in your Notion page
               or create new ones if needed.
             </p>
 
@@ -191,7 +191,7 @@ export function OnboardingModal() {
           <div className="py-4">
             <h3 className="text-lg font-medium mb-2">Ready to Go!</h3>
             <p className="mb-4">
-              You're all set to use the SerenityFlow Documentation Portal.
+              You're all set to use the Quinta Vale da Lama Documentation Portal.
             </p>
             <div className="space-y-4">
               <div className="rounded-md bg-muted p-4">
