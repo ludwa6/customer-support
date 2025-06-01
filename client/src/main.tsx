@@ -3,23 +3,23 @@ import App from "./App";
 import "./index.css";
 
 // Set title for the application
-document.title = "SerenityFlow Support Portal";
+document.title = "Quinta Vale da Lama Support Portal";
 
 // Set the description meta tag for SEO
 const metaDescription = document.createElement("meta");
 metaDescription.name = "description";
-metaDescription.content = "SerenityFlow customer support portal with AI assistance, documentation, and ticket submission capabilities.";
+metaDescription.content = "Quinta Vale da Lama customer support portal with AI assistance, documentation, and ticket submission capabilities.";
 document.head.appendChild(metaDescription);
 
 // Add Open Graph tags
 const ogTitle = document.createElement("meta");
 ogTitle.property = "og:title";
-ogTitle.content = "SerenityFlow Support Portal";
+ogTitle.content = "Quinta Vale da Lama Support Portal";
 document.head.appendChild(ogTitle);
 
 const ogDescription = document.createElement("meta");
 ogDescription.property = "og:description";
-ogDescription.content = "Get help with SerenityFlow through our AI-powered support portal.";
+ogDescription.content = "Get help with Quinta Vale da Lama through our AI-powered support portal.";
 document.head.appendChild(ogDescription);
 
 const ogType = document.createElement("meta");
