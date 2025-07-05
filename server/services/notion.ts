@@ -3,6 +3,14 @@ import * as fs from "fs";
 import { extractPageIdFromUrl } from "./utils";
 import { validateDatabaseSchema, printValidationResult } from "./notion-validation";
 
+/**
+ * Replace SerenityFlow branding with Quinta Vale da Lama branding in text
+ */
+function replaceSerenityFlowBranding(text: string): string {
+  if (!text) return text;
+  return text.replace(/SerenityFlow/g, 'Quinta Vale da Lama');
+}
+
 // Load database configuration from file if specified
 let databaseConfig = {
   databases: {
@@ -290,7 +298,7 @@ export async function getCategories() {
         return categoryOptions.map(option => ({
           id: option.id,
           name: option.name,
-          description: `${option.name} category for SerenityFlow`,
+          description: `${option.name} category for Quinta Vale da Lama`,
           icon: option.color || "default",
         }));
       }
@@ -299,19 +307,19 @@ export async function getCategories() {
     // Last resort - return default categories if nothing can be found
     console.log("No categories database found, using fallback categories");
     return [
-      { id: "XODu", name: "Getting Started", description: "Getting Started category for SerenityFlow", icon: "blue" },
-      { id: "QbD8", name: "Account Settings", description: "Account Settings category for SerenityFlow", icon: "green" },
-      { id: "LcVm", name: "Workflows & Automations", description: "Workflows & Automations category for SerenityFlow", icon: "purple" },
-      { id: "PqXj", name: "Integrations", description: "Integrations category for SerenityFlow", icon: "orange" }
+      { id: "XODu", name: "Getting Started", description: "Getting Started category for Quinta Vale da Lama", icon: "blue" },
+      { id: "QbD8", name: "Account Settings", description: "Account Settings category for Quinta Vale da Lama", icon: "green" },
+      { id: "LcVm", name: "Workflows & Automations", description: "Workflows & Automations category for Quinta Vale da Lama", icon: "purple" },
+      { id: "PqXj", name: "Integrations", description: "Integrations category for Quinta Vale da Lama", icon: "orange" }
     ];
   } catch (error) {
     console.error("Error fetching categories from Notion:", error);
     // Return default categories as fallback
     return [
-      { id: "XODu", name: "Getting Started", description: "Getting Started category for SerenityFlow", icon: "blue" },
-      { id: "QbD8", name: "Account Settings", description: "Account Settings category for SerenityFlow", icon: "green" },
-      { id: "LcVm", name: "Workflows & Automations", description: "Workflows & Automations category for SerenityFlow", icon: "purple" },
-      { id: "PqXj", name: "Integrations", description: "Integrations category for SerenityFlow", icon: "orange" }
+      { id: "XODu", name: "Getting Started", description: "Getting Started category for Quinta Vale da Lama", icon: "blue" },
+      { id: "QbD8", name: "Account Settings", description: "Account Settings category for Quinta Vale da Lama", icon: "green" },
+      { id: "LcVm", name: "Workflows & Automations", description: "Workflows & Automations category for Quinta Vale da Lama", icon: "purple" },
+      { id: "PqXj", name: "Integrations", description: "Integrations category for Quinta Vale da Lama", icon: "orange" }
     ];
   }
 }
@@ -571,8 +579,8 @@ export async function getFAQs(categoryId?: string) {
                       
       return {
         id: page.id,
-        question: questionText,
-        answer: answerText,
+        question: replaceSerenityFlowBranding(questionText),
+        answer: replaceSerenityFlowBranding(answerText),
         categoryId: catProp?.select?.id || "",
         categoryName: catProp?.select?.name || "Uncategorized"
       };

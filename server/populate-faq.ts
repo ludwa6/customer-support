@@ -18,8 +18,8 @@ async function populateFAQs() {
       Category: "Account and Subscription"
     },
     {
-      Question: "Can I integrate SerenityFlow with my existing tools?",
-      Answer: "Yes! SerenityFlow integrates with over 100 popular tools and services, including Notion, Slack, Google Workspace, Microsoft Office, Trello, Asana, and many more. Visit our Integrations page to see the full list.",
+      Question: "Can I integrate Quinta Vale da Lama with my existing tools?",
+      Answer: "Yes! Quinta Vale da Lama integrates with over 100 popular tools and services, including Notion, Slack, Google Workspace, Microsoft Office, Trello, Asana, and many more. Visit our Integrations page to see the full list.",
       Category: "Technical Help"
     },
     {
@@ -34,12 +34,12 @@ async function populateFAQs() {
     },
     {
       Question: "Can I schedule workflows to run at specific times?",
-      Answer: "Yes, SerenityFlow supports scheduled workflows. When creating a workflow, select 'Schedule' as your trigger, then specify the timing (hourly, daily, weekly, monthly, or custom cron expressions).",
+      Answer: "Yes, Quinta Vale da Lama supports scheduled workflows. When creating a workflow, select 'Schedule' as your trigger, then specify the timing (hourly, daily, weekly, monthly, or custom cron expressions).",
       Category: "Content and Features"
     },
     {
       Question: "What happens if my workflow encounters an error?",
-      Answer: "If your workflow encounters an error, SerenityFlow will notify you via email and in the dashboard. You can view detailed error logs and retry failed workflows from the Workflow Monitoring section.",
+      Answer: "If your workflow encounters an error, Quinta Vale da Lama will notify you via email and in the dashboard. You can view detailed error logs and retry failed workflows from the Workflow Monitoring section.",
       Category: "Technical Help"
     },
     {
@@ -48,12 +48,12 @@ async function populateFAQs() {
       Category: "Account and Subscription"
     },
     {
-      Question: "Is my data secure with SerenityFlow?",
-      Answer: "Yes, security is our top priority. SerenityFlow uses industry-standard encryption for all data in transit and at rest. We are SOC 2 compliant and conduct regular security audits. We never store your third-party service credentials in plain text.",
+      Question: "Is my data secure with Quinta Vale da Lama?",
+      Answer: "Yes, security is our top priority. Quinta Vale da Lama uses industry-standard encryption for all data in transit and at rest. We are SOC 2 compliant and conduct regular security audits. We never store your third-party service credentials in plain text.",
       Category: "Privacy and Security"
     },
     {
-      Question: "How do I get started with SerenityFlow?",
+      Question: "How do I get started with Quinta Vale da Lama?",
       Answer: "Getting started is easy! Sign up for a free account, follow our interactive onboarding guide, and check out our Quick Start tutorials. You'll be creating your first workflow in minutes.",
       Category: "Getting Started"
     },
