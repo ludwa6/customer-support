@@ -1,15 +1,43 @@
-# SerenityFlow Documentation Portal
+# ⚠️ IMPORTANT: This is the Original Template - Not Production Code
+
+**This repository contains Manny Bernabe's original "SerenityFlow Documentation Portal" template.**
+
+**Production App Location:** The actual production code is running on Replit at:
+- Replit Project: `customer-support-walt6`
+- Live URL: https://customer-support-walt6.replit.app/
+
+**For Production Documentation:** See `docs/` folder or https://github.com/ludwa6/claude-workspace/tree/main/projects/customer-support
+
+---
+
+# SerenityFlow Documentation Portal (Original Template)
+
+**Original Author:** Manny Bernabe  
+**Tutorial:** https://www.notion.so/mannybernabe/Tutorial-Customer-Support-Page-with-Notion-Backend-1edc922b6d5b802faa2bfacc83da185d
 
 An AI-powered customer support portal leveraging Notion databases for dynamic documentation and intelligent ticket management.
 
-## Quick Start
+## Note for Developers
+
+**If you're working on the Vale da Lama production deployment:**
+- The production code is in Replit: `customer-support-walt6`
+- See `/docs` folder in this repo for deployment documentation
+- Contact Walt Ludwig for access to production environment
+
+**If you want to remix this template:**
+- Follow the instructions below
+- This is the original template code
+- The production app has customizations not in this template
+
+---
+
+## Quick Start (Template Only)
 
 1. Make sure you have the required Notion integration keys set up:
    - `NOTION_INTEGRATION_SECRET`
    - `NOTION_PAGE_URL`
 
-2. **Identify databases in your Notion page** (important when remixing!):
-   ```bash
+2. **Identify databases in your Notion page** (important when remixing!):\n   ```bash
    # First, check what databases exist in your Notion page:
    npx tsx list-databases.ts
    ```
@@ -31,7 +59,7 @@ An AI-powered customer support portal leveraging Notion databases for dynamic do
    npm run dev
    ```
 
-## Remixing This Project
+## Remixing This Template
 
 If you're remixing this project, please follow these steps to ensure proper database connection:
 
@@ -42,8 +70,6 @@ If you're remixing this project, please follow these steps to ensure proper data
    ```bash
    node setup-remix.js
    ```
-
-This script automatically runs list-databases.ts first and then configures your application. It's the most reliable way to set up a remixed project.
 
 For detailed remix instructions, see [REMIXING.md](REMIXING.md).
 
@@ -66,8 +92,6 @@ For detailed remix instructions, see [REMIXING.md](REMIXING.md).
 5. Click "Submit"
 6. Copy the "Internal Integration Secret"
 
-> **Important:** We recommend creating a dedicated integration specifically for this project rather than reusing an existing one. This helps avoid conflicts and makes it easier to identify the correct databases during the setup process.
-
 ### Step 2: Share a Notion Page
 
 1. Create a new page in Notion or use an existing one
@@ -82,51 +106,30 @@ Add these environment variables to your project:
 - `NOTION_INTEGRATION_SECRET`: Your integration secret
 - `NOTION_PAGE_URL`: The URL of your shared Notion page
 
-### Reusing Existing Databases
-
-If your Notion page already has databases:
-
-1. Run `npx tsx list-databases.ts` to identify all available databases (titles and IDs)
-2. Run `node auto-setup.js` to automatically detect and configure them
-3. Or run `node use-existing-db.js` for a guided setup process
-4. The configuration will be automatically detected - no additional environment variables needed!
-
-> **Pro Tip:** Always start with the list-databases.ts script to identify databases that exist in your Notion page. This will give you a clear list of all available databases with their titles and IDs.
-
 ## Troubleshooting
 
 - **Content not appearing**: Check that your Notion page is shared with the integration
 - **Database connection issues**: Make sure the notion-config.json file exists in the project root
-- **Missing databases**: First run `npx tsx list-databases.ts` to identify available databases, then use `node use-existing-db.js` to configure them
-- **Database identification issues**: Always start with `npx tsx list-databases.ts` to get a complete list of database titles and IDs
+- **Missing databases**: First run `npx tsx list-databases.ts` to identify available databases
 
-## About Remixing
+---
 
-When remixing this project, you can seamlessly use your existing Notion databases instead of creating new ones.
+## Production Deployment (Vale da Lama)
 
-### Quick Remix Instructions
+**This section is for the production deployment team only.**
 
-1. **See [REMIXING.md](./REMIXING.md) for a complete guide with ready-to-use prompts**
-2. **Set Notion Secrets**: Add your `NOTION_INTEGRATION_SECRET` and `NOTION_PAGE_URL` environment variables
-3. **Use the AI Assistant**: Ask it to detect and configure your existing Notion databases
-4. **Start the App**: Once configured, the app will use your existing Notion content
+The production app (running on Replit) is a customized version of this template with:
+- Categories feature removed
+- Dual-domain support (farm + hotel)
+- Custom branding and content
+- Modified database structure
 
-### Preventing Database Duplication
+**For production deployment documentation:**
+- See [docs/](./docs/) folder
+- Contact: Walt Ludwig
+- Replit Project: `customer-support-walt6`
 
-The app includes enhanced safeguards to prevent any database creation in remixed projects:
-- A `.prevent-notion-setup` marker file is automatically created on startup
-- All database creation functions have been modified to never create new databases
-- The remixing logic in auto-setup.js prioritizes existing databases
-- Detection of existing databases happens automatically during server startup
+---
 
-### Supported Database Types
-
-The system requires:
-- FAQs database (the main content type)
-- Support Tickets database (for ticket management)
-
-**Notes:** 
-- The application doesn't require a dedicated Categories database - it can extract categories from any database with select-type properties
-- Articles functionality has been deprecated and merged with FAQs
-
-Before remixing, make sure your Notion page contains both a FAQs database and a Support Tickets database. The application will only use existing databases, never creating new ones in remixed projects.
+**Original Template Credits:** Manny Bernabe  
+**Production Customization:** Walt Ludwig / Vale da Lama
